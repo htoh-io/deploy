@@ -6,6 +6,10 @@ on:
       app_name:
         required: true 
         type: string
+      app_version:
+        description: App version. If image is metabase/metabase:v0.43.4, then app_version = v0.43.4
+        required: false
+        type: string
     secrets:
       ACR_ENDPOINT:
         required: true
@@ -42,6 +46,7 @@ jobs:
         name: Setup Buildpack
         uses: buildpacks/github-actions/setup-pack@v4.4.0
       - id: release_docker
+        if: ${{ inputs.app_version == null }}
         name: Release Docker image
         run: |
           image_name=${{ secrets.ACR_ENDPOINT }}/${{ inputs.app_name }}:${{ steps.tag.outputs.tag }}
@@ -50,10 +55,17 @@ jobs:
       - id: release_helm
         name: Release Helm chart
         run: |
+          chart_version=${{ steps.tag.outputs.tag }} 
+          if [ -z "${{ inputs.app_version == null }}"]; then
+            app_version=${{ steps.tag.outputs.tag }} 
+          else
+            app_version=${{ inputs.app_version }} 
+          fi
+
           helm registry login ${{ secrets.ACR_ENDPOINT }} \
             --username ${{ secrets.ACR_USERNAME }} \
             --password ${{ secrets.ACR_PASSWORD }}
-          app_version=${{ steps.tag.outputs.tag }}
-          helm package --version $app_version --app-version $app_version ./helm
-          helm push ${{ inputs.app_name }}-$app_version.tgz oci://${{ secrets.ACR_ENDPOINT }}/helm
-          echo "::set-output name=version::$app_version" 
+           
+          helm package --version $app_version --app-version $chart_version ./helm
+          helm push ${{ inputs.app_name }}-$chart_version.tgz oci://${{ secrets.ACR_ENDPOINT }}/helm
+          echo "::set-output name=version::$chart_version" 
