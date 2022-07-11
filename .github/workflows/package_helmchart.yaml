@@ -13,11 +13,17 @@ on:
         required: true
       ACR_PASSWORD:
         required: true
+    outputs:
+      version: 
+        description: "Package's version"
+        value: ${{ jobs.package.outputs.version }}
 
 jobs:
   package:
     name: Package Helm chart
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.release_helm.outputs.version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
