@@ -12,7 +12,7 @@ on:
         type: string
       environment:
         description: 'Environment to deploy to'
-        type: environment
+        type: string
         required: true
     secrets:
       ACR_ENDPOINT:
