@@ -1,0 +1,64 @@
+name: Deploy to AKS 
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        required: true 
+        type: string 
+      version_to_deploy:
+        description: 'Version to deploy (ex.: 0.11.0)'
+        required: true 
+        type: string
+      environment:
+        description: 'Environment to deploy to'
+        type: environment
+        required: true
+    secrets:
+      ACR_ENDPOINT:
+        required: true
+      ACR_USERNAME:
+        required: true
+      ACR_PASSWORD:
+        required: true
+      AZURE_CREDENTIALS:
+        required: true
+
+env:
+  CLUSTER_NAME_PREFIX: aks
+  CLUSTER_RESOURCE_GROUP_PREFIX: rg-env
+
+jobs:
+  build:
+    name: Deploy Helmchart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Display deployment parameters 
+        run: |
+          echo "Version to deploy: ${{ inputs.version_to_deploy }}"
+          echo "Environment: ${{ inputs.environment }}" 
+      - uses: azure/aks-set-context@v1
+        name: Config connection to Kubernetes cluster
+        with:
+          creds: '${{ secrets.AZURE_CREDENTIALS }}'
+          cluster-name: '${{ env.CLUSTER_NAME_PREFIX }}-${{ inputs.environment }}'
+          resource-group: '${{ env.CLUSTER_RESOURCE_GROUP_PREFIX }}-${{ inputs.environment }}'
+      - uses: azure/setup-helm@v3
+        name: Install Helm
+      - name: Setup Helm with Azure Container Registry
+        run: |
+          helm registry login ${{ secrets.ACR_ENDPOINT }} -u ${{ secrets.ACR_USERNAME }} -p ${{ secrets.ACR_PASSWORD }}
+      - name: Deploy to AKS
+        run: |
+          deployed_version=$(helm list -n ${{ inputs.app_name }} -o json | jq "if (. | length) > 0 then .[0].app_version else empty end")
+          version_to_deploy=${{ inputs.version_to_deploy }}
+          helmchart="oci://${{ secrets.ACR_ENDPOINT }}/helm/${{ inputs.app_name }}"
+          app=${{ inputs.app_name }}
+          value_file="./environments/${{ inputs.environment }}.yaml"
+          if [ -z "$deployed_version" ]; then
+            helm install -f $value_file --namespace $app --create-namespace $app $helmchart --version $version_to_deploy 
+          else 
+            helm upgrade -f $value_file --namespace $app --create-namespace $app $helmchart --version $version_to_deploy 
+          fi
