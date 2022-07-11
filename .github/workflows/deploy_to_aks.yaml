@@ -29,8 +29,8 @@ env:
   CLUSTER_RESOURCE_GROUP_PREFIX: rg-env
 
 jobs:
-  build:
-    name: Deploy Helmchart
+  deploy:
+    name: Deploy to AKS
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
