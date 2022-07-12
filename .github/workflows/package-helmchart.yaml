@@ -61,7 +61,7 @@ jobs:
         name: Release Helm chart
         run: |
           chart_version=${{ steps.tag.outputs.tag }} 
-          if [ -z "${{ inputs.app_version == null }}" ]; then
+          if [ -z "${{ inputs.app_version }}" ]; then
             app_version=${{ steps.tag.outputs.tag }} 
           else
             app_version=${{ inputs.app_version }} 
