@@ -56,7 +56,7 @@ jobs:
         name: Release Helm chart
         run: |
           chart_version=${{ steps.tag.outputs.tag }} 
-          if [ -z "${{ inputs.app_version == null }}"]; then
+          if [ -z "${{ inputs.app_version == null }}" ]; then
             app_version=${{ steps.tag.outputs.tag }} 
           else
             app_version=${{ inputs.app_version }} 
@@ -65,7 +65,7 @@ jobs:
           helm registry login ${{ secrets.ACR_ENDPOINT }} \
             --username ${{ secrets.ACR_USERNAME }} \
             --password ${{ secrets.ACR_PASSWORD }}
-           
+
           helm package --version $app_version --app-version $chart_version ./helm
           helm push ${{ inputs.app_name }}-$chart_version.tgz oci://${{ secrets.ACR_ENDPOINT }}/helm
           echo "::set-output name=version::$chart_version" 
