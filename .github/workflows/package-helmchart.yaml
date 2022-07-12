@@ -42,7 +42,7 @@ jobs:
           registry: ${{ secrets.ACR_ENDPOINT }}
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
-      - id: setup-pack
+      - id: setup_pack
         name: Setup Buildpack
         uses: buildpacks/github-actions/setup-pack@v4.4.0
       - id: release_docker
@@ -62,10 +62,15 @@ jobs:
             app_version=${{ inputs.app_version }} 
           fi
 
+          echo "Authenticating with ACR"
           helm registry login ${{ secrets.ACR_ENDPOINT }} \
             --username ${{ secrets.ACR_USERNAME }} \
             --password ${{ secrets.ACR_PASSWORD }}
 
+          echo "Packaging"
           helm package --version $app_version --app-version $chart_version ./helm
+          ls -la
+          echo "Publishing"
           helm push ${{ inputs.app_name }}-$chart_version.tgz oci://${{ secrets.ACR_ENDPOINT }}/helm
+          echo "Done"
           echo "::set-output name=version::$chart_version" 
