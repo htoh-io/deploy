@@ -74,9 +74,9 @@ jobs:
           fi
           
           echo "Packaging for app_version=$app_version, chart_version=$chart_version"
-          helm package --app-version $app_version --version $chart_version ./helm
+          #helm package --app-version $app_version --version $chart_version ./helm
 
-          echo "Publishing"
-          helm push ${{ inputs.app_name }}-$chart_version.tgz oci://${{ secrets.ACR_ENDPOINT }}/helm
+          #echo "Publishing"
+          #helm push ${{ inputs.app_name }}-$chart_version.tgz oci://${{ secrets.ACR_ENDPOINT }}/helm
           
           echo "::set-output name=version::$chart_version" 
