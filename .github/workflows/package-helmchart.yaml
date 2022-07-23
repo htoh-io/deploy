@@ -57,9 +57,15 @@ jobs:
           helm registry login ${{ secrets.ACR_ENDPOINT }} \
             --username ${{ secrets.ACR_USERNAME }} \
             --password ${{ secrets.ACR_PASSWORD }}
+      - name: Checkout Helm templates repo
+        uses: actions/checkout@v3
+        with:
+          repository: htoh-io/deploy
+          path: deploy
       - id: release_helm
         name: Release Helm chart
         run: |
+          ls -la          
           chart_version=${{ steps.tag.outputs.tag }} 
           if [ -z "${{ inputs.app_version }}" ]; then
             app_version=${{ steps.tag.outputs.tag }} 
