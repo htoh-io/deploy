@@ -1,0 +1,5 @@
+namespace: htoh
+
+resources:
+- namespace.yaml
+- ingress-api.yaml
