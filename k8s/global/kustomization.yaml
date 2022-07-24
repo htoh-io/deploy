@@ -2,4 +2,4 @@ namespace: htoh
 
 resources:
 - namespace.yaml
-- ingress-api.yaml
+- ingress-gateway.yaml
