@@ -1,14 +1,20 @@
 name: 'Release Docker image'
 description: 'Package with Buildpack and release to ACR'
 inputs:
-  inputs:
-    app-name:
-      required: true 
-      type: string
-    app-version:
-      description: App version.
-      required: false
-      type: string
+  app-name:
+    required: true 
+    type: string
+  app-version:
+    description: App version.
+    required: false
+    type: string
+secrets:
+  ACR_ENDPOINT:
+    required: true
+  ACR_USERNAME:
+    required: true
+  ACR_PASSWORD:
+    required: true
 outputs:
   image-name:
     description: "Docker image repo name"
