@@ -39,7 +39,6 @@ jobs:
       - id: release_docker
         if: ${{ inputs.app_version == null }}
         name: Release Docker image
-        shell: bash
         run: |
           image_name=${{ secrets.ACR_ENDPOINT }}/${{ inputs.app_name }}:${{ inputs.app_version }}
           pack build $image_name --builder paketobuildpacks/builder:base

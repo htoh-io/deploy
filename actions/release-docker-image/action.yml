@@ -31,6 +31,7 @@ runs:
       uses: buildpacks/github-actions/setup-pack@v4.4.0
     - id: release-docker
       name: Release Docker image
+      shell: bash
       run: |
         image_name=${{ inputs.acr-endpoint }}/${{ inputs.app-name }}:${{ inputs.app-version }}
         pack build $image_name --builder paketobuildpacks/builder:base
