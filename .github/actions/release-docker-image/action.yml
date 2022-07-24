@@ -1,0 +1,35 @@
+name: 'Release Docker image'
+description: 'Package with Buildpack and release to ACR'
+inputs:
+  inputs:
+    app-name:
+      required: true 
+      type: string
+    app-version:
+      description: App version.
+      required: false
+      type: string
+outputs:
+  image-name:
+    description: "Docker image repo name"
+    value: ${{ steps.release_docker.outputs.random-number }}
+runs:
+  using: "composite"
+  steps:
+    - name: Authenticate with ACR
+      uses: docker/login-action@v1
+      with:
+        registry: ${{ secrets.ACR_ENDPOINT }}
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+    - id: setup-pack
+      name: Setup Buildpack
+      uses: buildpacks/github-actions/setup-pack@v4.4.0
+    - id: release-docker
+      name: Release Docker image
+      run: |
+        image_name=${{ secrets.ACR_ENDPOINT }}/${{ inputs.app-name }}:${{ inputs.app-version }}
+        pack build $image_name --builder paketobuildpacks/builder:base
+        docker push $image_name
+
+        echo "::set-output name=image-name::$image_name"
