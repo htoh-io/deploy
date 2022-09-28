@@ -1,0 +1,49 @@
+name: Package Docker 
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        required: true 
+        type: string
+      app_version:
+        description: App version. If image is metabase/metabase:v0.43.4, then app_version = v0.43.4
+        required: false
+        type: string
+    secrets:
+      ACR_ENDPOINT:
+        required: true
+      ACR_USERNAME:
+        required: true
+      ACR_PASSWORD:
+        required: true
+    outputs:
+      version: 
+        description: "Package's version"
+        value: ${{ jobs.package.outputs.version }}
+
+jobs:
+  package:
+    name: Package Docker
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.release_helm.outputs.version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Get tag
+        uses: dawidd6/action-get-tag@v1
+        with:
+          strip_v: true
+      - name: Authenticate with ACR
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.ACR_ENDPOINT }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+      - if: ${{ inputs.app_version == null }}
+        name: Release Docker image
+        run: |
+          image_name=${{ secrets.ACR_ENDPOINT }}/${{ inputs.app_name }}:${{ steps.tag.outputs.tag }}
+          docker build -t $image_name .
+          docker push $image_name
