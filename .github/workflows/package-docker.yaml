@@ -27,7 +27,7 @@ jobs:
     name: Package Docker
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.release_helm.outputs.version }}
+      version: ${{ steps.release_docker.outputs.version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -42,8 +42,10 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
       - if: ${{ inputs.app_version == null }}
+        id: release_docker
         name: Release Docker image
         run: |
           image_name=${{ secrets.ACR_ENDPOINT }}/${{ inputs.app_name }}:${{ steps.tag.outputs.tag }}
           docker build -t $image_name .
           docker push $image_name
+          echo "::set-output name=version::${{ steps.tag.outputs.tag }}" 
