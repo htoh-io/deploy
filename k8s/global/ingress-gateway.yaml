@@ -12,6 +12,7 @@ spec:
   tls:
     - hosts:
         - "hapi.htoh.app"
+        - "data.htoh.app"
       secretName: tls-secret-gateway
   rules:
     - host: "hapi.htoh.app"
@@ -21,6 +22,16 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: htoh-api-gateway
+                name: htoh-server
+                port:
+                  number: 80
+    - host: "data.htoh.app"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: htoh-etl
                 port:
                   number: 80
