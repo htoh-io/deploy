@@ -7,12 +7,16 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "8m"
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
         - "hapi.htoh.app"
         - "data.htoh.app"
+        - "manage.prd.htoh.app"
+        - "id.prd.htoh.app"
+        - "api.prd.htoh.app"
       secretName: tls-secret-gateway
   rules:
     - host: "hapi.htoh.app"
@@ -33,5 +37,35 @@ spec:
             backend:
               service:
                 name: htoh-etl
+                port:
+                  number: 80
+    - host: "manage.prd.htoh.app"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: htoh-web
+                port:
+                  number: 80
+    - host: "api.prd.htoh.app"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: htoh-api
+                port:
+                  number: 80
+    - host: "id.prd.htoh.app"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: htoh-keycloak
                 port:
                   number: 80
