@@ -13,3 +13,4 @@ metadata:
     app.kubernetes.io/name: ingress-nginx
 data:
   proxy-buffer-size: "16k"
+  use-forwarded-headers: "true"
