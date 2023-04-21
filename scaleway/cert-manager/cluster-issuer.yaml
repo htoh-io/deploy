@@ -1,0 +1,24 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt
+spec:
+  acme:
+    email: manhha@htoh.io
+    preferredChain: ""
+    privateKeySecretRef:
+      name: letsencrypt
+    server: https://acme-v02.api.letsencrypt.org/directory
+    solvers:
+    - dns01:
+        azureDNS:
+          clientID: c8d5b098-5728-4eaa-98e3-28a47bfdea9e
+          clientSecretSecretRef:
+          # The following is the secret we created in Kubernetes. Issuer will use this to present challenge to Azure DNS.
+            name: azuredns-config
+            key: client-secret
+          subscriptionID: a130654f-11e9-4af9-a215-a62b7dfcfc22
+          tenantID: 16843612-824f-477b-a87b-20f98cf04416
+          resourceGroupName: rg-dns
+          hostedZoneName: htoh.app
+          environment: AzurePublicCloud
