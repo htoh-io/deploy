@@ -1,5 +1,6 @@
 namespace: cert-manager
 
 resources:
+- azuredns-client-secret.yaml
 - cert-manager.yaml
 - cluster-issuer.yaml
