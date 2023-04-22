@@ -1,0 +1,61 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: central
+spec:
+  mode: daemonset
+  image: otel/opentelemetry-collector-contrib
+  env:
+    - name: PROMETHEUS_ENDPOINT
+      valueFrom:
+        secretKeyRef:
+          key: prometheus-endpoint
+          name: opentelemetry-collector
+    - name: LOKI_ENDPOINT
+      valueFrom:
+        secretKeyRef:
+          key: loki-endpoint
+          name: opentelemetry-collector
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+    processors:
+      memory_limiter:
+        check_interval: 1s
+        limit_percentage: 75
+        spike_limit_percentage: 15
+      batch:
+        send_batch_size: 10000
+        timeout: 10s
+      transform:
+        error_mode: ignore
+        log_statements:
+          - context: log
+            statements:
+              - set(attributes["logger"], instrumentation_scope.name)
+              - set(attributes["loki.attribute.labels"], "logger")
+
+    exporters:
+      logging:
+      prometheusremotewrite:
+        endpoint: ${env:PROMETHEUS_ENDPOINT}
+      loki:
+        endpoint: ${env:LOKI_ENDPOINT}
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter]
+          exporters: [logging]
+        logs:
+          receivers: [otlp]
+          processors: [memory_limiter, transform, batch]
+          exporters: [loki]
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, transform, batch]
+          exporters: [prometheusremotewrite]
