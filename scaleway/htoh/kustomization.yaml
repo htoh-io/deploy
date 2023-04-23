@@ -1,0 +1,8 @@
+namespace: htoh
+
+resources:
+- namespace.yaml
+- github-actions.yaml
+- secret-registry-credential.yaml
+- ingress-api.yaml
+- instrumentation.yaml
