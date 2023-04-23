@@ -4,5 +4,6 @@ resources:
 - namespace.yaml
 - github-actions.yaml
 - secret-registry-credential.yaml
+- secret-htoh-api.yaml
 - ingress-api.yaml
 - instrumentation.yaml
