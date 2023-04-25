@@ -20,6 +20,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: demo-otel
+                name: htoh-api
                 port:
                   name: http
