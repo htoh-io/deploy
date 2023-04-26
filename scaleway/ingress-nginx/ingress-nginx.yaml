@@ -322,6 +322,7 @@ apiVersion: v1
 data:
   allow-snippet-annotations: "true"
   proxy-buffer-size: "16k"
+  client-body-buffer-size: "512k"
   use-forwarded-headers: "true"
   compute-full-forwarded-for: "true"
   use-proxy-protocol: "true"
