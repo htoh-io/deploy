@@ -1,0 +1,6 @@
+namespace: grafana
+
+resources:
+- namespace.yaml
+- secret.yaml
+- grafana.yaml
