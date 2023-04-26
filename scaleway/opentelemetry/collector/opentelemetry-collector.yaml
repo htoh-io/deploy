@@ -39,6 +39,7 @@ spec:
             statements:
               - set(attributes["logger"], instrumentation_scope.name)
               - set(attributes["loki.attribute.labels"], "logger")
+              - keep_keys(resource.attributes, ["service.name", "host.name", "process.runtime.version"])
 
     exporters:
       logging:
