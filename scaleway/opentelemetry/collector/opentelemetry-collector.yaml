@@ -6,22 +6,24 @@ spec:
   mode: daemonset
   image: otel/opentelemetry-collector-contrib
   env:
-    - name: PROMETHEUS_ENDPOINT
+    - name: GRAFANA_CLOUD_SECRET_KEY
       valueFrom:
         secretKeyRef:
-          key: prometheus-endpoint
-          name: opentelemetry-collector
-    - name: LOKI_ENDPOINT
-      valueFrom:
-        secretKeyRef:
-          key: loki-endpoint
+          key: grafana-cloud-secret-key
           name: opentelemetry-collector
   config: |
+    extensions:
+      basicauth/otlp:
+        client_auth:
+          username: 268635
+          password: ${env:GRAFANA_CLOUD_SECRET_KEY}
+
     receivers:
       otlp:
         protocols:
           grpc:
           http:
+
     processors:
       memory_limiter:
         check_interval: 1s
@@ -40,22 +42,24 @@ spec:
 
     exporters:
       logging:
-      prometheusremotewrite:
-        endpoint: ${env:PROMETHEUS_ENDPOINT}
-      loki:
-        endpoint: ${env:LOKI_ENDPOINT}
+      otlphttp:
+        auth:
+          authenticator: basicauth/otlp
+        endpoint: https://otlp-gateway-prod-eu-west-0.grafana.net/otlp  
 
     service:
+      extensions:
+        - basicauth/otlp
       pipelines:
         traces:
           receivers: [otlp]
           processors: [memory_limiter]
-          exporters: [logging]
+          exporters: [otlphttp]
         logs:
           receivers: [otlp]
           processors: [memory_limiter, transform, batch]
-          exporters: [loki]
+          exporters: [otlphttp]
         metrics:
           receivers: [otlp]
           processors: [memory_limiter, transform, batch]
-          exporters: [prometheusremotewrite]
+          exporters: [otlphttp]
