@@ -328,7 +328,7 @@ data:
   use-proxy-protocol: "true"
   proxy-add-original-uri-header: "true"
   log-format-escape-json: "true"
-  log-format-upstream: '{"timestamp": "$time_iso8601", "request_id": "$req_id", "proxy_upstream_name": "$proxy_upstream_name", "proxy_alternative_upstream_name": "$proxy_alternative_upstream_name","upstream_status": $upstream_status, "upstream_addr": "$upstream_addr","http_request":{"request_method": "$request_method", "reques_url": "$host$request_uri", "status": $status,"request_length": $request_length, "response_length": $upstream_response_length, "user_agent": "$http_user_agent", "remote_ip": "$remote_addr", "referer": "$http_referer", "latency": "$upstream_response_time s", "protocol":"$server_protocol"}}'
+  log-format-upstream: '{"timestamp": "$time_iso8601", "request_id": "$req_id", "proxy_upstream_name": "$proxy_upstream_name", "proxy_alternative_upstream_name": "$proxy_alternative_upstream_name","upstream_status": $upstream_status, "upstream_addr": "$upstream_addr","http_request":{"request_method": "$request_method", "request_uri": "$host$request_uri", "status": $status,"request_length": $request_length, "response_length": $upstream_response_length, "user_agent": "$http_user_agent", "remote_ip": "$remote_addr", "referer": "$http_referer", "latency": "$upstream_response_time s", "protocol":"$server_protocol"}}'
 kind: ConfigMap
 metadata:
   labels:
