@@ -13,7 +13,8 @@ configOverrides:
     # This will make sure the redirect_uri is properly computed, even with SSL offloading
     ENABLE_PROXY_FIX = True
     FEATURE_FLAGS = {
-        "DYNAMIC_PLUGINS": True
+        "DYNAMIC_PLUGINS": True,
+        "ENABLE_TEMPLATE_PROCESSING": True
     }
 
     APP_ICON = "https://my.htoh.app/images/logo_htoh_plain.png"
