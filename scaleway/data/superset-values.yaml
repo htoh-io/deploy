@@ -1,0 +1,91 @@
+envFromSecret: '{{ template "superset.fullname" . }}-env-overridden'
+
+bootstrapScript: |
+  #!/bin/bash
+  pip install psycopg2==2.9.6 \
+    sqlalchemy-bigquery==1.5.0 \
+    authlib && \
+     
+  if [ ! -f ~/bootstrap ]; then echo "Running Superset with uid {{ .Values.runAsUser }}" > ~/bootstrap; fi
+
+configOverrides:
+  my_override: |
+    # This will make sure the redirect_uri is properly computed, even with SSL offloading
+    ENABLE_PROXY_FIX = True
+    FEATURE_FLAGS = {
+        "DYNAMIC_PLUGINS": True
+    }
+
+    APP_ICON = "https://my.htoh.app/images/logo_htoh_plain.png"
+    APP_ICON_WIDTH = 72
+
+  enable_oauth: |
+    import logging
+    from superset.security import SupersetSecurityManager
+
+    class HtohSecurityManager(SupersetSecurityManager):
+
+        def oauth_user_info(self, provider, response=None):
+            if provider == 'htoh':
+                # This line request a GET to base_url + '/auth/userinfo' + with Bearer  Authentication
+                me = self.appbuilder.sm.oauth_remotes[provider].get('auth/userinfo').json()
+                user_info = { 
+                    'id' : me['sub'], 
+                    'username' : me['email'], 
+                    'email' : me['email'], 
+                    'name' : me['name'], 
+                    'first_name': me['given_name'], 
+                    'last_name': me['family_name'],
+                    'role_keys': me['roles']
+                }
+                return user_info
+
+    CUSTOM_SECURITY_MANAGER = HtohSecurityManager            
+
+    # This will make sure the redirect_uri is properly computed, even with SSL offloading
+    ENABLE_PROXY_FIX = True
+
+    from flask_appbuilder.security.manager import AUTH_OAUTH
+    AUTH_SERVER = "https://api.htoh.app"
+    AUTH_TYPE = AUTH_OAUTH
+    OAUTH_PROVIDERS = [
+      {
+          "name": "htoh",
+          "icon": "fa-lock",
+          "token_key": "access_token",
+          "remote_app": {
+              "client_id": "htoh",
+              "client_secret": "fAQ6LFEsHFrRKmYyegXXx5RHxJaaQj",
+              "client_kwargs": {"scope": "openid profile"},
+              "request_token_url": None,
+              'api_base_url': AUTH_SERVER,
+              "access_token_url": f"{AUTH_SERVER}/auth/oauth2/token",
+              "authorize_url": f"{AUTH_SERVER}/auth/oauth2/authorize",
+              "server_metadata_url": f"{AUTH_SERVER}/.well-known/openid-configuration"
+          },
+      }
+    ]
+
+    # Map Authlib roles to superset roles
+    AUTH_ROLE_ADMIN = 'Admin'
+    AUTH_ROLE_PUBLIC = 'Public'
+
+    # Will allow user self registration, allowing to create Flask users from Authorized User
+    AUTH_USER_REGISTRATION = True
+
+    AUTH_ROLES_SYNC_AT_LOGIN = True
+    # PERMANENT_SESSION_LIFETIME = 1800
+    AUTH_ROLES_MAPPING = {
+        "htoh_internal_admin": ["Admin"],
+        "htoh_travel_manager": ["Gamma"],
+        "htoh_travel_assistant": ["Gamma"],
+        "htoh_traveler": ["Gamma"]
+    }
+
+
+# Disable Helm dependencies
+postgresql:
+  enabled: false
+
+# redis:
+#   enabled: false

@@ -1,0 +1,6 @@
+namespace: data
+
+resources:
+- namespace.yaml
+- secret.yaml
+- ingress-data.yaml
