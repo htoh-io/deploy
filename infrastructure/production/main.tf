@@ -50,58 +50,33 @@ resource "scaleway_vpc_gateway_network" "main" {
   enable_masquerade  = true
 }
 
+resource "scaleway_instance_server" "kosmos_instance" {
+  count      = 2
+  project_id = var.project_id
+  type       = "PLAY2-MICRO"
+  image      = "ubuntu_jammy"
+  name       = "${scaleway_k8s_cluster.kosmos.name}-${scaleway_k8s_pool.kosmos_external.name}-${count.index}"
 
-# resource "scaleway_instance_ip" "public_ip" {
-#   project_id = var.project_id
-# }
+  tags = ["kosmos", "managed-by:terraform"]
 
-# resource "scaleway_instance_volume" "data" {
-#   project_id = var.project_id
-#   size_in_gb = 10
-#   type       = "b_ssd"
-# }
+  user_data = {
+    cloud-init = <<-EOF
+    #cloud-config
 
-resource "scaleway_instance_security_group" "www" {
-  project_id              = var.project_id
-  inbound_default_policy  = "drop"
-  outbound_default_policy = "accept"
+    package_update: true
 
-  inbound_rule {
-    action   = "accept"
-    port     = "22"
-    ip_range = "0.0.0.0/0"
-  }
-
-  inbound_rule {
-    action = "accept"
-    port   = "80"
-  }
-
-  inbound_rule {
-    action = "accept"
-    port   = "443"
+    runcmd:
+      - wget https://scwcontainermulticloud.s3.fr-par.scw.cloud/multicloud-init.sh
+      - chmod +x multicloud-init.sh
+      - ./multicloud-init.sh -p 3758cdeb-ec2a-4809-96b6-70490922539f -r fr-par -t bab05934-61af-4281-be69-c57d1d15e7e2
+    EOF
   }
 }
 
-resource "scaleway_instance_server" "web" {
-  project_id = var.project_id
-  type       = "DEV1-S"
-  image      = "ubuntu_jammy"
-  name       = "web"
-
-  tags = ["front", "web", "managed-by:terraform"]
-
-  # ip_id = scaleway_instance_ip.public_ip.id
-
-  # additional_volume_ids = [scaleway_instance_volume.data.id]
-
-  #   root_volume {
-  #     # The local storage of a DEV1-L instance is 80 GB, subtract 30 GB from the additional l_ssd volume, then the root volume needs to be 50 GB.
-  #     # size_in_gb = 10
-  #     delete_on_termination = true
-  #   }
-
-  security_group_id = scaleway_instance_security_group.www.id
+resource "scaleway_instance_private_nic" "kosmos_instance_1_dmz" {
+  count              = length(scaleway_instance_server.kosmos_instance)
+  server_id          = scaleway_instance_server.kosmos_instance[count.index].id
+  private_network_id = scaleway_vpc_private_network.pn01.id
 }
 
 resource "scaleway_rdb_instance" "test_vpc" {
@@ -114,11 +89,18 @@ resource "scaleway_rdb_instance" "test_vpc" {
   password       = "thiZ_is_v&ry_s3cret"
 }
 
-resource "scaleway_instance_private_nic" "web_dmz" {
-  server_id          = scaleway_instance_server.web.id
-  private_network_id = scaleway_vpc_private_network.pn01.id
+resource "scaleway_k8s_cluster" "kosmos" {
+  name                        = "kosmos"
+  type                        = "multicloud"
+  version                     = "1.26.4"
+  cni                         = "kilo"
+  delete_additional_resources = false
 }
 
-data "scaleway_vpc_public_gateway_dhcp_reservation" "by_mac_address" {
-  mac_address = "${scaleway_instance_private_nic.web_dmz.mac_address}"
+resource "scaleway_k8s_pool" "kosmos_external" {
+  cluster_id = scaleway_k8s_cluster.kosmos.id
+  name       = "external"
+  node_type  = "external"
+  size       = 0
+  min_size   = 0
 }
