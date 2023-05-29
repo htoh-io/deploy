@@ -10,21 +10,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - api.scw.htoh.app
         - api.prd.htoh.app
         - api.htoh.app
       secretName: tls-secret-api
   rules:
-    - host: api.scw.htoh.app
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: htoh-api
-                port:
-                  name: http
     - host: api.prd.htoh.app
       http:
         paths:
