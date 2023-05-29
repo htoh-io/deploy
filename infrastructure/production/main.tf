@@ -12,7 +12,7 @@ terraform {
 terraform {
   required_providers {
     scaleway = {
-      source = "scaleway/scaleway"
+      source  = "scaleway/scaleway"
       version = "2.20.0"
     }
   }
@@ -24,18 +24,50 @@ provider "scaleway" {
   region = var.region
 }
 
+data "scaleway_account_project" "default" {
+  name = "default"
+}
+
+data "scaleway_account_project" "production" {
+  name = "production"
+}
+
 resource "scaleway_iam_application" "github" {
-  name        = "Github"
+  name = "Github"
 }
 
 resource "scaleway_iam_application" "kubernetes" {
   name        = "Kubernetes"
+  description = "Access to container registry"
 }
 
 resource "scaleway_iam_application" "htoh_api_dev" {
-  name        = "HtoH API - dev"
+  name = "HtoH API - dev"
 }
 
 resource "scaleway_iam_application" "htoh_api_prd" {
-  name        = "HtoH API - prd"
+  name = "HtoH API - prd"
+}
+
+resource "scaleway_iam_policy" "github" {
+  application_id = scaleway_iam_application.github.id
+  name           = "Github"
+
+  rule {
+    permission_set_names = [
+      "ContainerRegistryFullAccess",
+    ]
+    project_ids = [
+      data.scaleway_account_project.default.id,
+      data.scaleway_account_project.production.id,
+    ]
+  }
+  rule {
+    permission_set_names = [
+      "FunctionsFullAccess",
+    ]
+    project_ids = [
+      data.scaleway_account_project.production.id,
+    ]
+  }
 }
