@@ -23,3 +23,23 @@ provider "scaleway" {
   zone   = var.zone
   region = var.region
 }
+
+resource "scaleway_iam_application" "github" {
+  name        = "Github"
+}
+
+resource "scaleway_iam_application" "kubernetes" {
+  name        = "Kubernetes"
+}
+
+resource "scaleway_iam_application" "htoh_api_dev" {
+  name        = "HtoH API - dev"
+}
+
+resource "scaleway_iam_application" "htoh_api_dev" {
+  name        = "HtoH API - dev"
+}
+
+resource "scaleway_iam_application" "htoh_api_prd" {
+  name        = "HtoH API - dev"
+}
