@@ -12,7 +12,7 @@
 - Create a [K8s secret with that API key](https://www.scaleway.com/en/docs/tutorials/external-secrets/#create-a-secret-containing-your-scaleway-api-key-information), it could be in the external-secrets or default namespace.
 
 ```bash
-kubectl create secret generic scwsm-secret --namespace external-secrets --from-file=./access-key --from-file=./secret-key
+kubectl create secret generic scwsm-secret --namespace external-secrets --from-file=./.access-key --from-file=./.secret-key
 ```
 
 - Install the Helmchart
@@ -72,7 +72,7 @@ Make sure to have a container registry credential to pull images from private re
 
 ```bash
 # Create secret
-kubectl create secret docker-registry registry-credential --docker-server=rg.fr-par.scw.cloud --docker-username=htoh --docker-password="$SCW_CONTAINER_KEY"
+kubectl create secret docker-registry registry-credential --docker-server=rg.fr-par.scw.cloud --docker-username=htoh --docker-password="$SCALEWAY_DOCKER_SECRET"
 ```
 
 - Declare the ExternalSecret and putting a label into the application's namespace so that the ClusterSecretStore allows it to access secrrets.

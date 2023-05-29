@@ -1,0 +1,4 @@
+namespace: external-secrets
+
+resources:
+- scw-secret-store.yaml
