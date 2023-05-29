@@ -36,10 +36,6 @@ resource "scaleway_iam_application" "htoh_api_dev" {
   name        = "HtoH API - dev"
 }
 
-resource "scaleway_iam_application" "htoh_api_dev" {
-  name        = "HtoH API - dev"
-}
-
 resource "scaleway_iam_application" "htoh_api_prd" {
-  name        = "HtoH API - dev"
+  name        = "HtoH API - prd"
 }
