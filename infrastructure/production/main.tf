@@ -125,3 +125,22 @@ resource "scaleway_iam_policy" "kubernetes" {
     ]
   }
 }
+
+resource "scaleway_iam_api_key" "kubernetes1" {
+  application_id = scaleway_iam_application.kubernetes.id
+  description    = "Access to container registry, read secrets"
+}
+
+resource "scaleway_iam_api_key" "htoh_api_dev1" {
+  application_id = scaleway_iam_application.htoh_api_dev.id
+  description    = "Run tests during development phase"
+}
+
+resource "scaleway_iam_api_key" "htoh_api_prd1" {
+  application_id = scaleway_iam_application.htoh_api_prd.id
+}
+
+resource "scaleway_iam_api_key" "github1" {
+  application_id = scaleway_iam_application.github.id
+  description    = "Github Actions"
+}
