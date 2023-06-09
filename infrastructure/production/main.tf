@@ -32,20 +32,25 @@ data "scaleway_account_project" "production" {
   name = "production"
 }
 
+data "scaleway_account_project" "staging" {
+  name = "staging"
+}
 
 data "scaleway_account_project" "development" {
   name = "development"
 }
 
-resource "scaleway_vpc" "vpc01" {
+resource "scaleway_vpc" "prd_par" {
     name = "default"
     region = "fr-par"
     project_id = data.scaleway_account_project.production.id
+    tags = ["managed_by:terraform"]
 }
 
-resource "scaleway_vpc_private_network" "apps" {
+resource "scaleway_vpc_private_network" "prd_apps" {
   name        = "apps"
   is_regional = true
-  vpc_id      = scaleway_vpc.vpc01.id
+  vpc_id      = scaleway_vpc.prd_par.id
   tags = ["managed_by:terraform"]
 }
+
