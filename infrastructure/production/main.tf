@@ -13,7 +13,7 @@ terraform {
   required_providers {
     scaleway = {
       source  = "scaleway/scaleway"
-      version = "2.20.0"
+      version = "2.21.0"
     }
   }
   required_version = ">= 0.13"
@@ -37,3 +37,15 @@ data "scaleway_account_project" "development" {
   name = "development"
 }
 
+resource "scaleway_vpc" "vpc01" {
+    name = "default"
+    region = "fr-par"
+    project_id = data.scaleway_account_project.production.id
+}
+
+resource "scaleway_vpc_private_network" "apps" {
+  name        = "apps"
+  is_regional = true
+  vpc_id      = scaleway_vpc.vpc01.id
+  tags = ["managed_by:terraform"]
+}
