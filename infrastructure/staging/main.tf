@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket                      = "prd-terraform"
+    bucket                      = "stg-terraform"
     key                         = "terraform_state.tfstate"
     region                      = "fr-par"
     endpoint                    = "https://s3.fr-par.scw.cloud"
@@ -28,22 +28,14 @@ data "scaleway_account_project" "default" {
   name = "default"
 }
 
-data "scaleway_account_project" "production" {
-  name = "production"
-}
-
 data "scaleway_account_project" "staging" {
   name = "staging"
-}
-
-data "scaleway_account_project" "development" {
-  name = "development"
 }
 
 resource "scaleway_vpc" "vpc_par" {
   name       = "default"
   region     = "fr-par"
-  project_id = data.scaleway_account_project.production.id
+  project_id = data.scaleway_account_project.staging.id
   tags       = ["terraform"]
 }
 
@@ -51,6 +43,6 @@ resource "scaleway_vpc_private_network" "apps" {
   name        = "apps"
   is_regional = true
   vpc_id      = scaleway_vpc.vpc_par.id
-  project_id  = data.scaleway_account_project.production.id
+  project_id = data.scaleway_account_project.staging.id
   tags        = ["terraform"]
 }
