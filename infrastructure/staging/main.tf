@@ -425,3 +425,13 @@ resource "helm_release" "nginx_ingress" {
     value = "true"
   }
 }
+
+// open-telemetry-operator
+resource "helm_release" "opentelemetry_operator" {
+  name             = "opentelemetry-operator"
+  repository       = "https://open-telemetry.github.io/opentelemetry-helm-charts"
+  chart            = "opentelemetry-operator"
+  version          = "0.31.0"
+  namespace        = "opentelemetry-operator-system"
+  create_namespace = true
+}
