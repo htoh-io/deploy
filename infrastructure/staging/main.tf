@@ -15,6 +15,14 @@ terraform {
       source  = "scaleway/scaleway"
       version = "2.21.0"
     }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "2.10.1"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "2.21.1"
+    }
   }
   required_version = ">= 0.13"
 }
@@ -34,7 +42,7 @@ data "scaleway_account_project" "staging" {
 
 resource "scaleway_vpc" "vpc_par" {
   name       = "default"
-  region     = "fr-par"
+  region     = var.region
   project_id = var.project_id
   tags       = ["terraform"]
 }
@@ -106,7 +114,7 @@ resource "scaleway_rdb_privilege" "main" {
 resource "scaleway_rdb_acl" "private_network" {
   instance_id = scaleway_rdb_instance.htoh.id
   acl_rules {
-    ip = "172.16.4.0/22"
+    ip          = "172.16.4.0/22"
     description = "Private network with K8s"
   }
 }
@@ -116,7 +124,7 @@ resource "scaleway_k8s_cluster" "htoh" {
   version                     = "1.27"
   cni                         = "cilium"
   delete_additional_resources = false
-  project_id = var.project_id
+  project_id                  = var.project_id
 
   private_network_id = scaleway_vpc_private_network.apps.id
 
@@ -135,4 +143,121 @@ resource "scaleway_k8s_pool" "htoh_default" {
   min_size    = 1
   max_size    = 10
   autoscaling = false
+}
+
+resource "null_resource" "kubeconfig" {
+  depends_on = [scaleway_k8s_pool.htoh_default] # at least one pool here
+  triggers = {
+    host                   = scaleway_k8s_cluster.htoh.kubeconfig[0].host
+    token                  = scaleway_k8s_cluster.htoh.kubeconfig[0].token
+    cluster_ca_certificate = scaleway_k8s_cluster.htoh.kubeconfig[0].cluster_ca_certificate
+  }
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = null_resource.kubeconfig.triggers.host
+    token                  = null_resource.kubeconfig.triggers.token
+    cluster_ca_certificate = base64decode(null_resource.kubeconfig.triggers.cluster_ca_certificate)
+  }
+}
+
+resource "helm_release" "external_secrets" {
+  name             = "external-secrets"
+  repository       = "https://charts.external-secrets.io"
+  chart            = "external-secrets"
+  version          = "v0.8.2"
+  namespace        = "external-secrets"
+  create_namespace = true
+}
+
+provider "kubernetes" {
+  host                   = scaleway_k8s_cluster.htoh.kubeconfig[0].host
+  cluster_ca_certificate = base64decode(null_resource.kubeconfig.triggers.cluster_ca_certificate)
+  token                  = scaleway_k8s_cluster.htoh.kubeconfig[0].token
+}
+
+resource "scaleway_iam_application" "kubernetes" {
+  name = "Kubernetes - stg"
+}
+
+resource "scaleway_iam_policy" "kubernetes" {
+  application_id = scaleway_iam_application.kubernetes.id
+  name           = "Kubernetes - stg"
+  description    = "Access to container registry and secrets"
+
+  rule {
+    permission_set_names = [
+      "ContainerRegistryReadOnly",
+      "SecretManagerFullAccess",
+    ]
+    project_ids = [
+      data.scaleway_account_project.default.id,
+      data.scaleway_account_project.staging.id,
+    ]
+  }
+}
+
+resource "scaleway_iam_api_key" "kubernetes1" {
+  application_id = scaleway_iam_application.kubernetes.id
+  description    = "Access to container registry and secrets on staging"
+}
+
+resource "kubernetes_secret" "scwsm_secret" {
+  metadata {
+    name      = "scwsm-secret"
+    namespace = "external-secrets"
+  }
+
+  data = {
+    access-key = scaleway_iam_api_key.kubernetes1.access_key
+    secret-key = scaleway_iam_api_key.kubernetes1.secret_key
+  }
+
+  depends_on = [helm_release.external_secrets]
+}
+
+resource "kubernetes_manifest" "scw_secret_store" {
+  manifest = {
+    apiVersion = "external-secrets.io/v1beta1"
+    kind       = "ClusterSecretStore"
+    metadata = {
+      name = "scw-secret-store"
+    }
+    spec = {
+      conditions = [
+        {
+          namespaceSelector = {
+            matchLabels = {
+              "secret.htoh.io/required" = "true"
+            }
+          }
+        },
+        {
+          namespaces = ["cert-manager"]
+        },
+      ]
+      provider = {
+        scaleway = {
+          projectId = var.project_id
+          region    = var.region
+          accessKey = {
+            secretRef = {
+              key       = "access-key"
+              name      = "scwsm-secret"
+              namespace = "external-secrets"
+            }
+          }
+
+          secretKey = {
+            secretRef = {
+              key       = "secret-key"
+              name      = "scwsm-secret"
+              namespace = "external-secrets"
+            }
+          }
+        }
+      }
+    }
+  }
 }
