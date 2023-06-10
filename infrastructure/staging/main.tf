@@ -71,7 +71,7 @@ data "scaleway_secret" "htoh_db_htoh_password" {
 }
 
 data "scaleway_secret_version" "htoh_db_htoh_password" {
-  secret_id = data.scaleway_secret.htoh_db_admin_password.secret_id
+  secret_id = data.scaleway_secret.htoh_db_htoh_password.secret_id
   revision  = "1"
 }
 
@@ -217,6 +217,7 @@ resource "kubernetes_secret" "scwsm_secret" {
   depends_on = [helm_release.external_secrets]
 }
 
+
 resource "kubernetes_manifest" "scw_secret_store" {
   manifest = {
     apiVersion = "external-secrets.io/v1beta1"
@@ -259,5 +260,36 @@ resource "kubernetes_manifest" "scw_secret_store" {
         }
       }
     }
+  }
+}
+
+resource "kubernetes_namespace" "htoh" {
+  metadata {
+    name = "htoh"
+
+    labels = {
+      "secret.htoh.io/required" = true
+    }
+  }
+}
+
+resource "kubernetes_secret" "registry_credential" {
+  metadata {
+    name = "registry-credential"
+    namespace = kubernetes_namespace.htoh.metadata[0].name
+  }
+
+  type = "kubernetes.io/dockerconfigjson"
+
+  data = {
+    ".dockerconfigjson" = jsonencode({
+      auths = {
+        "rg.fr-par.scw.cloud" = {
+          "username" = "htoh"
+          "password" = scaleway_iam_api_key.kubernetes1.secret_key
+          "auth"     = base64encode("htoh:${scaleway_iam_api_key.kubernetes1.secret_key}")
+        }
+      }
+    })
   }
 }
