@@ -162,6 +162,8 @@ provider "helm" {
   }
 }
 
+// external-secrets
+
 resource "helm_release" "external_secrets" {
   name             = "external-secrets"
   repository       = "https://charts.external-secrets.io"
@@ -263,6 +265,8 @@ resource "kubernetes_manifest" "scw_secret_store" {
   }
 }
 
+// htoh
+
 resource "kubernetes_namespace" "htoh" {
   metadata {
     name = "htoh"
@@ -275,7 +279,7 @@ resource "kubernetes_namespace" "htoh" {
 
 resource "kubernetes_secret" "registry_credential" {
   metadata {
-    name = "registry-credential"
+    name      = "registry-credential"
     namespace = kubernetes_namespace.htoh.metadata[0].name
   }
 
@@ -291,5 +295,85 @@ resource "kubernetes_secret" "registry_credential" {
         }
       }
     })
+  }
+}
+
+// cert-manager
+
+resource "helm_release" "cert_manager" {
+  name             = "cert-manager"
+  repository       = "https://charts.jetstack.io"
+  chart            = "cert-manager"
+  version          = "v1.12.1"
+  namespace        = "cert-manager"
+  create_namespace = true
+
+  set {
+    name  = "installCRDs"
+    value = "true"
+  }
+}
+
+resource "kubernetes_manifest" "external_secret_azuredns_config" {
+  manifest = {
+    apiVersion = "external-secrets.io/v1beta1"
+    kind       = "ExternalSecret"
+    metadata = {
+      name = "azuredns-config"
+      namespace = "cert-manager"
+    }
+    spec = {
+      refreshInterval = "60m"
+      secretStoreRef = {
+        name = "scw-secret-store"
+        kind = "ClusterSecretStore"
+      }
+      target = {
+        name = "azuredns-config"
+      }
+      data = [{
+        secretKey = "client-secret"
+        remoteRef = {
+          key     = "id:bdddd9df-81a2-4fbd-9f27-450a8d23d0ff"
+          version = "latest_enabled"
+        }
+      }]
+    }
+  }
+}
+
+resource "kubernetes_manifest" "cert_manager_cluster_issuer" {
+  manifest = {
+    apiVersion = "cert-manager.io/v1"
+    kind       = "ClusterIssuer"
+    metadata = {
+      name = "letsencrypt"
+    }
+    spec = {
+      acme = {
+        email          = "manhha@htoh.io"
+        preferredChain = ""
+        privateKeySecretRef = {
+          name = "letsencrypt"
+        }
+        server = "https://acme-v02.api.letsencrypt.org/directory"
+        solvers = [{
+          dns01 = {
+            azureDNS = {
+              clientID = "c8d5b098-5728-4eaa-98e3-28a47bfdea9e"
+              clientSecretSecretRef = {
+                name = "azuredns-config"
+                key  = "client-secret"
+              }
+              subscriptionID    = "a130654f-11e9-4af9-a215-a62b7dfcfc22"
+              tenantID          = "16843612-824f-477b-a87b-20f98cf04416"
+              resourceGroupName = "rg-dns"
+              hostedZoneName    = "htoh.app"
+              environment       = "AzurePublicCloud"
+            }
+          }
+        }]
+      }
+    }
   }
 }
