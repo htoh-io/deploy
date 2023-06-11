@@ -387,10 +387,10 @@ resource "scaleway_lb_ip" "ingress_ip" {
 
 resource "helm_release" "nginx_ingress" {
   name      = "nginx-ingress"
-  namespace = "kube-system"
-
+  namespace = "ingress-nginx"
   repository = "https://kubernetes.github.io/ingress-nginx"
   chart      = "ingress-nginx"
+  create_namespace = true
 
   set {
     name  = "controller.service.loadBalancerIP"
@@ -434,4 +434,55 @@ resource "helm_release" "opentelemetry_operator" {
   version          = "0.31.0"
   namespace        = "opentelemetry-operator-system"
   create_namespace = true
+}
+
+
+// open-telemetry-collector
+resource "kubernetes_namespace" "open_telemetry" {
+  metadata {
+    name = "open-telemetry"
+
+    labels = {
+      "secret.htoh.io/required" = true
+    }
+  }
+}
+
+resource "kubernetes_manifest" "open_telemetry_collector" {
+  manifest = {
+    apiVersion = "opentelemetry.io/v1alpha1"
+    kind       = "OpenTelemetryCollector"
+    metadata = {
+      name = "central"
+      namespace = "open-telemetry"
+    }
+    spec = {
+      mode   = "daemonset"
+      image  = "otel/opentelemetry-collector-contrib"
+      config = <<EOT
+        receivers:
+          receivers:
+            k8s_cluster:
+              collection_interval: 10s
+          filelog:
+            include:
+              - /var/log/pods/*/*/*.log
+            #exclude:
+              # Exclude logs from all containers named otel-collector
+            #  - /var/log/pods/*/otel-collector/*.log
+            start_at: beginning
+            include_file_path: true
+            include_file_name: false
+
+        exporters:
+          logging:
+            verbosity: detailed
+        service:
+          pipelines:
+            logs:
+              receivers: [k8s_cluster]
+              exporters: [logging]
+      EOT
+    }
+  }
 }
