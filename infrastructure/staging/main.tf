@@ -426,16 +426,14 @@ resource "helm_release" "nginx_ingress" {
   }
 }
 
-resource "helm_release" "grafana_agent" {
-  name      = "grafana-agent"
-  namespace = "grafana"
-  repository = "https://grafana.github.io/helm-charts"
-  chart      = "grafana-agent"
+resource "helm_release" "open_telemetry_collector" {
+  name      = "open-telemetry-collector"
+  namespace = "open-telemetry"
+  repository = "https://open-telemetry.github.io/opentelemetry-helm-charts"
+  chart      = "opentelemetry-collector"
   create_namespace = true
-  set {
-    name = "agent.configMap.config"
-    value = <<EOT
 
-    EOT
-  }
+  values = [
+    "${file("otel-values.yaml")}"
+  ]
 }
