@@ -1,5 +1,10 @@
 mode: daemonset
 
+fullnameOverride: "open-telemetry-collector"
+
+service:
+  enabled: true
+
 presets:
   hostMetrics:
     enabled: false
@@ -15,7 +20,7 @@ config:
   receivers: 
     filelog:
       exclude:
-      - /var/log/pods/open-telemetry_open-telemetry-collector-opentelemetry-collector*_*/opentelemetry-collector/*.log
+      - /var/log/pods/open-telemetry_open-telemetry-collector*/opentelemetry-collector/*.log
       - /var/log/pods/kube-system_konnectivity-agent*/konnectivity-agent/*.log
       include:
       # - /var/log/pods/*/*/*.log
