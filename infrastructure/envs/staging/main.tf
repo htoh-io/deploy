@@ -194,8 +194,8 @@ resource "scaleway_iam_policy" "kubernetes" {
       "SecretManagerFullAccess",
     ]
     project_ids = [
-      data.scaleway_account_project.default.id,
       data.scaleway_account_project.staging.id,
+      data.scaleway_account_project.default.id,
     ]
   }
 }
@@ -408,12 +408,50 @@ resource "helm_release" "nginx_ingress" {
   }
 }
 
+resource "kubernetes_namespace" "open_telemetry" {
+  metadata {
+    name = "open-telemetry"
+
+    labels = {
+      "secret.htoh.io/required" = true
+      "name" = "open-telemetry"
+    }
+  }
+}
+
+resource "kubernetes_manifest" "external_secret_scaleway_cockpit" {
+  manifest = {
+    apiVersion = "external-secrets.io/v1beta1"
+    kind       = "ExternalSecret"
+    metadata = {
+      name      = "scaleway-cockpit-secret"
+      namespace = kubernetes_namespace.htoh.metadata[0].name
+    }
+    spec = {
+      refreshInterval = "60m"
+      secretStoreRef = {
+        name = "scw-secret-store"
+        kind = "ClusterSecretStore"
+      }
+      target = {
+        name = "scaleway-cockpit-secret"
+      }
+      data = [{
+        secretKey = "loki-endpoint"
+        remoteRef = {
+          key     = "id:c2265c81-c669-40ca-936b-a13c749cc2d9"
+          version = "latest_enabled"
+        }
+      }]
+    }
+  }
+}
+
 resource "helm_release" "open_telemetry_collector" {
   name      = "open-telemetry-collector"
   namespace = "open-telemetry"
   repository = "https://open-telemetry.github.io/opentelemetry-helm-charts"
   chart      = "opentelemetry-collector"
-  create_namespace = true
 
   values = [
     "${file("values-opentelemetry.yaml")}"
