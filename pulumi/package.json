@@ -5,10 +5,10 @@
         "@types/node": "^16"
     },
     "dependencies": {
-        "@pulumi/azure-native": "^2.7.0",
+        "@pulumi/azure": "^5.52.0",
+        "@pulumi/azure-native": "^2.11.0",
         "@pulumi/kubernetes": "^4.2.0",
         "@pulumi/kubernetes-cert-manager": "^0.0.5",
-        "@pulumi/kubernetes-ingress-nginx": "^0.0.10",
         "@pulumi/pulumi": "^3.0.0"
     }
 }
