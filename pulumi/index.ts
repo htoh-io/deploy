@@ -2,6 +2,7 @@ import * as pulumi from "@pulumi/pulumi"
 import * as k8s from "@pulumi/kubernetes"
 import { ExternalSecretsComponent } from './external-secrets'
 import { CertManagerComponent } from './cert-manager'
+import { IngressControllerComponent } from './ingress-controller'
 
 const config = new pulumi.Config()
 config.requireSecret("ssmAccessKey")
@@ -12,6 +13,10 @@ const externalSecrets = new ExternalSecretsComponent("external-secrets", {
 });
 
 const certManager = new CertManagerComponent("cert-manager", {}, {
+    dependsOn: [externalSecrets]
+})
+
+const ingressController = new IngressControllerComponent("ingress-nginx", {}, {
     dependsOn: [externalSecrets]
 })
 
