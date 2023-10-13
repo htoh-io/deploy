@@ -52,10 +52,6 @@ spec:
       extensions:
         - basicauth/otlp
       pipelines:
-        traces:
-          receivers: [otlp]
-          processors: [memory_limiter]
-          exporters: [otlphttp]
         logs:
           receivers: [otlp]
           processors: [memory_limiter, transform, batch]

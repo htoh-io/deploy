@@ -5,6 +5,7 @@
         "@types/node": "^16"
     },
     "dependencies": {
+        "@pulumi/azure-native": "^2.7.0",
         "@pulumi/kubernetes": "^4.2.0",
         "@pulumi/pulumi": "^3.0.0"
     }
