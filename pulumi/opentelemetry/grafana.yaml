@@ -1,0 +1,48 @@
+extensions:
+  basicauth/otlp:
+    client_auth:
+      username: 268635
+      password: ${env:GRAFANA_CLOUD_SECRET_KEY}
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 75
+    spike_limit_percentage: 15
+  batch:
+    send_batch_size: 10000
+    timeout: 10s
+  transform:
+    error_mode: ignore
+    log_statements:
+      - context: log
+        statements:
+          - set(attributes["logger"], instrumentation_scope.name)
+          - set(attributes["loki.attribute.labels"], "logger")
+          - keep_keys(resource.attributes, ["service.name", "host.name", "process.runtime.version"])
+
+exporters:
+  logging:
+  otlphttp:
+    auth:
+      authenticator: basicauth/otlp
+    endpoint: https://otlp-gateway-prod-eu-west-0.grafana.net/otlp  
+
+service:
+  extensions:
+    - basicauth/otlp
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, transform, batch]
+      exporters: [otlphttp]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, transform, batch]
+      exporters: [otlphttp]

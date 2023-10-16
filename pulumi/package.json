@@ -2,7 +2,7 @@
     "name": "htoh-pulumi",
     "main": "index.ts",
     "devDependencies": {
-        "@types/node": "^16"
+        "@types/node": "^20.8.6"
     },
     "dependencies": {
         "@pulumi/azure": "^5.52.0",

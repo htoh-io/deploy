@@ -1,8 +1,8 @@
 import * as pulumi from "@pulumi/pulumi"
-import * as k8s from "@pulumi/kubernetes"
 import { ExternalSecretsComponent } from './external-secrets'
 import { CertManagerComponent } from './cert-manager'
 import { IngressControllerComponent } from './ingress-controller'
+import { OpenTelemetryComponent } from './opentelemetry'
 import * as azure from "@pulumi/azure"
 
 const config = new pulumi.Config("htoh")
@@ -26,6 +26,11 @@ const ingressController = new IngressControllerComponent("ingress-nginx", {
     zone: zone
 }, {
     dependsOn: [externalSecrets]
+})
+
+const openTelemetry = new OpenTelemetryComponent("open-telemetry", {}, 
+{
+    dependsOn: [certManager, externalSecrets]
 })
 
 function toBase64(data: string): string {

@@ -16,6 +16,8 @@ export class IngressControllerComponent extends pulumi.ComponentResource {
             directory: `https://github.com/kubernetes/ingress-nginx/tree/controller-v${args.ingressVersion}/deploy/static/provider/scw`
         })
 
+        // This can fail if the ingressNginx above is not yet deployed
+        // Workaround: comment the lines below 
         const service = k8s.core.v1.Service.get("ingress-nginx-service", "ingress-nginx/ingress-nginx-controller", {
             dependsOn: [ingressNginx]
         })
@@ -61,9 +63,11 @@ export class IngressControllerComponent extends pulumi.ComponentResource {
                     spec: {
                         containers: [{
                             name: appName,
-                            image: "paulbouwer/hello-kubernetes:1.8",
+                            image: "adminer",
                             ports: [{ containerPort: 8080 }],
-                            env: [{ name: "MESSAGE", value: "Hello K8s!" }],
+                            // env: [
+                            //     { name: "MESSAGE", value: "Hello K8s!" }
+                            // ],
                         }],
                     },
                 },

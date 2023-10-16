@@ -17,6 +17,9 @@ export class CertManagerComponent extends pulumi.ComponentResource {
                 name: "cert-manager",
                 annotations: {
                     "certmanager.k8s.io/disable-validation": "true"
+                },
+                labels: {
+                    "secret.htoh.io/required": "true"
                 }
             }
         })
