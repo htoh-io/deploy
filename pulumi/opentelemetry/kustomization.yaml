@@ -1,4 +1,0 @@
-namespace: opentelemetry
-
-resources:
-- operator.yaml
