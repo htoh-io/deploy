@@ -1,9 +1,11 @@
 import * as pulumi from "@pulumi/pulumi"
-import { ExternalSecretsComponent } from './external-secrets'
-import { CertManagerComponent } from './cert-manager'
-import { IngressControllerComponent } from './ingress-controller'
-import { OpenTelemetryComponent } from './opentelemetry'
 import * as azure from "@pulumi/azure"
+import { 
+    ExternalSecretsComponent,
+    CertManagerComponent,
+    IngressControllerComponent,
+    OpenTelemetryComponent
+} from './components'
 
 const config = new pulumi.Config("htoh")
 

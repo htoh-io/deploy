@@ -1,11 +1,11 @@
 import * as k8s from "@pulumi/kubernetes"
 import * as pulumi from "@pulumi/pulumi"
 import * as fs from 'fs'
+import path = require('path')
 
 export class OpenTelemetryComponent extends pulumi.ComponentResource {
     constructor(name: string, args: {}, opts?: pulumi.ComponentResourceOptions) {
         super("htoh:index:OpenTelemetryComponent", name, args, opts);
-        const currentDirectory = `./opentelemetry`
 
         const namespace = new k8s.core.v1.Namespace("opentelemetry", {
             metadata: {
@@ -58,7 +58,7 @@ export class OpenTelemetryComponent extends pulumi.ComponentResource {
             dependsOn: [secret]
         })
 
-        const grafanaConfig: string = fs.readFileSync(`${currentDirectory}/grafana.yaml`,'utf8')
+        const grafanaConfig: string = fs.readFileSync(path.resolve(__dirname, `grafana.yaml`),'utf8')
         const collector = new k8s.apiextensions.CustomResource("opentelemetry-collector", {
             apiVersion: "opentelemetry.io/v1alpha1",
             kind: "OpenTelemetryCollector",
