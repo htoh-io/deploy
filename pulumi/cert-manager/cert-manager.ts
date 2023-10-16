@@ -33,10 +33,6 @@ export class CertManagerComponent extends pulumi.ComponentResource {
             }
         })
 
-        // const certManager = new k8s.kustomize.Directory("certManager", {
-        //     directory: "./cert-manager/", // should be relative the root of pulumi directory
-        // })
-
         const secret = new k8s.apiextensions.CustomResource("azuredns-config", {
             apiVersion: "external-secrets.io/v1beta1",
             kind: "ExternalSecret",
