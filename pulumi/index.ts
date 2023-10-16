@@ -4,7 +4,8 @@ import {
     ExternalSecretsComponent,
     CertManagerComponent,
     IngressControllerComponent,
-    OpenTelemetryComponent
+    OpenTelemetryComponent,
+    HtohAppComponent
 } from './components'
 
 const config = new pulumi.Config("htoh")
@@ -18,14 +19,8 @@ const certManager = new CertManagerComponent("cert-manager", {}, {
     dependsOn: [externalSecrets]
 })
 
-const zone = azure.dns.Zone.get(
-    "htoh.app",
-    config.require("zone-htoh-app")
-)
-
 const ingressController = new IngressControllerComponent("ingress-nginx", {
     ingressVersion: config.require("ingress-version"),
-    zone: zone
 }, {
     dependsOn: [externalSecrets]
 })
@@ -33,6 +28,20 @@ const ingressController = new IngressControllerComponent("ingress-nginx", {
 const openTelemetry = new OpenTelemetryComponent("open-telemetry", {}, 
 {
     dependsOn: [certManager, externalSecrets]
+})
+
+const zone = azure.dns.Zone.get(
+    "htoh.app",
+    config.require("zone-htoh-app")
+)
+
+// This can fail if the ingressNginx component is not yet completely deployed
+// which often take some times
+// Workaround: comment the lines below 
+const htohApp = new HtohAppComponent("htoh-app", {
+    zone: zone
+}, {
+    dependsOn: [ingressController, openTelemetry]
 })
 
 function toBase64(data: string): string {
