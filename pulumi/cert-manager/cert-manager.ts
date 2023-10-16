@@ -4,11 +4,6 @@ import * as certmanager from "@pulumi/kubernetes-cert-manager"
 
 
 export class CertManagerComponent extends pulumi.ComponentResource {
-    // private namespace: k8s.core.v1.Namespace
-    // private chart: k8s.helm.v3.Release
-    // private secret: k8s.apiextensions.CustomResource
-    // private clusterIssuer: k8s.apiextensions.CustomResource
-    //private manager: certmanager.CertManager
 
     constructor(
         name: string,

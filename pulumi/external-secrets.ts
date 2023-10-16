@@ -2,11 +2,6 @@ import * as k8s from "@pulumi/kubernetes"
 import * as pulumi from "@pulumi/pulumi"
 
 export class ExternalSecretsComponent extends pulumi.ComponentResource {
-    private namespace: k8s.core.v1.Namespace
-    private chart: k8s.helm.v3.Release
-    private secret: k8s.core.v1.Secret
-    private clusterSecretStore: k8s.apiextensions.CustomResource
-
     constructor(
         name: string, 
         args: {
@@ -20,23 +15,23 @@ export class ExternalSecretsComponent extends pulumi.ComponentResource {
         // declare all the same things all over again.
         super("htoh:index:ExternalSecretsComponent", name, args, opts);
 
-        this.namespace = new k8s.core.v1.Namespace("external-secrets", {
+        const namespace = new k8s.core.v1.Namespace("external-secrets", {
             metadata: {
                 name: "external-secrets"
             }
         })
 
-        this.chart = new k8s.helm.v3.Release("external-secrets", {
+        const chart = new k8s.helm.v3.Release("external-secrets", {
             chart: "external-secrets",
-            namespace: this.namespace.metadata.name,
+            namespace: namespace.metadata.name,
             repositoryOpts:{
                 repo: "https://charts.external-secrets.io",
             },
         })
         
-        this.secret = new k8s.core.v1.Secret("scwsm-secret", {
+        const secret = new k8s.core.v1.Secret("scwsm-secret", {
             metadata: {
-                namespace: this.namespace.metadata.name,
+                namespace: namespace.metadata.name,
                 name: "scwsm-secret"
             },
             type: "Opaque",
@@ -46,7 +41,7 @@ export class ExternalSecretsComponent extends pulumi.ComponentResource {
             },
         })
 
-        this.clusterSecretStore = new k8s.apiextensions.CustomResource("scw-secret-store", {
+        const clusterSecretStore = new k8s.apiextensions.CustomResource("scw-secret-store", {
             apiVersion: "external-secrets.io/v1beta1",
             kind: "ClusterSecretStore",
             metadata: {
@@ -89,7 +84,7 @@ export class ExternalSecretsComponent extends pulumi.ComponentResource {
                 ]
             }
         }, {
-            dependsOn: [this.chart, this.secret]
+            dependsOn: [chart, secret]
         })
     }   
 }
