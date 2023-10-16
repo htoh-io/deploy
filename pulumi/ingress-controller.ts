@@ -88,6 +88,9 @@ export class IngressControllerComponent extends pulumi.ComponentResource {
                 name: "hello-k8s-ingress",
                 annotations: {
                     "kubernetes.io/ingress.class": "nginx",
+                    "cert-manager.io/cluster-issuer": "letsencrypt",
+                    "nginx.ingress.kubernetes.io/ssl-redirect": "true",
+                    "nginx.ingress.kubernetes.io/proxy-body-size": "8m"
                 },
             },
             spec: {
@@ -97,7 +100,7 @@ export class IngressControllerComponent extends pulumi.ComponentResource {
                         hosts: [
                             "api.dev.htoh.app"
                         ],
-                        secretName: "tls-certificate"
+                        secretName: "tls-secret"
                     }
                 ],
                 rules: [

@@ -17,7 +17,7 @@ const certManager = new CertManagerComponent("cert-manager", {}, {
     dependsOn: [externalSecrets]
 })
 
-export const ingressController = new IngressControllerComponent("ingress-nginx", {}, {
+const ingressController = new IngressControllerComponent("ingress-nginx", {}, {
     dependsOn: [externalSecrets]
 })
 
