@@ -11,21 +11,26 @@ import {
 const config = new pulumi.Config("htoh")
 
 const externalSecrets = new ExternalSecretsComponent("external-secrets", {
+    version: config.require('external-secrets-version'),
     accessKey: config.requireSecret("ssm-access-key").apply(toBase64),
     secretKey: config.requireSecret("ssm-secret-key").apply(toBase64),
 });
 
-const certManager = new CertManagerComponent("cert-manager", {}, {
-    dependsOn: [externalSecrets]
-})
-
-const ingressController = new IngressControllerComponent("ingress-nginx", {
-    ingressVersion: config.require("ingress-version"),
+const certManager = new CertManagerComponent("cert-manager", {
+    version: `v${config.require('cert-manager-version')}`
 }, {
     dependsOn: [externalSecrets]
 })
 
-const openTelemetry = new OpenTelemetryComponent("open-telemetry", {}, 
+const ingressController = new IngressControllerComponent("ingress-nginx", {
+    version: config.require("ingress-version"),
+}, {
+    dependsOn: [externalSecrets]
+})
+
+const openTelemetry = new OpenTelemetryComponent("open-telemetry", {
+    version: config.require('opentelemetry-version')
+}, 
 {
     dependsOn: [certManager, externalSecrets]
 })

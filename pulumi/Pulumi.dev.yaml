@@ -7,3 +7,6 @@ config:
   htoh:ssm-secret-key:
     secure: v1:Tg5vX4rWFAq5NHzP:mLs9K3KtknDKnMYZ5zkDfyqGEJ1ms3eCtgvShKGutF2fDPNoD0Hiy+ZVlrRdWe7pwLUNRw==
   htoh:ingress-version: 1.9.3
+  htoh:cert-manager-version: 1.13.1
+  htoh:external-secrets-version: 0.9.6
+  htoh:opentelemetry-version: 0.40.0

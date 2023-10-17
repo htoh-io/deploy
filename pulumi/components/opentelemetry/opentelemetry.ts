@@ -4,7 +4,9 @@ import * as fs from 'fs'
 import path = require('path')
 
 export class OpenTelemetryComponent extends pulumi.ComponentResource {
-    constructor(name: string, args: {}, opts?: pulumi.ComponentResourceOptions) {
+    constructor(name: string, args: {
+        version: pulumi.Input<string>
+    }, opts?: pulumi.ComponentResourceOptions) {
         super("htoh:index:OpenTelemetryComponent", name, args, opts);
 
         const namespace = new k8s.core.v1.Namespace("opentelemetry", {
@@ -24,7 +26,7 @@ export class OpenTelemetryComponent extends pulumi.ComponentResource {
                 name: "opentelemetry-collector",
             },
             spec: {
-                "refreshInterval": "60m",
+                "refreshInterval": "2m",
                 "secretStoreRef": {
                     "name": "scw-secret-store",
                     "kind": "ClusterSecretStore"
@@ -36,7 +38,7 @@ export class OpenTelemetryComponent extends pulumi.ComponentResource {
                     {
                         "secretKey": "grafana-cloud-secret-key",
                         "remoteRef": {
-                            "key": "id:a4759563-7e68-4bab-bd00-004f9568599c",
+                            "key": "name:grafana-cloud-secret-key",
                             "version": "latest_enabled"
                         }
                     }
@@ -53,7 +55,8 @@ export class OpenTelemetryComponent extends pulumi.ComponentResource {
             values: {
                 "admissionWebhooks.certManager.enabled": "false",
                 "admissionWebhooks.certManager.autoGenerateCert": "true"
-            }
+            },
+            version: args.version
         }, {
             dependsOn: [secret]
         })

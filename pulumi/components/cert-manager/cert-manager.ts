@@ -7,7 +7,9 @@ export class CertManagerComponent extends pulumi.ComponentResource {
 
     constructor(
         name: string,
-        args: {},
+        args: {
+            version: pulumi.Input<string>
+        },
         opts?: pulumi.ComponentResourceOptions
     ) {
         super("htoh:index:CertManagerComponent", name, args, opts);
@@ -27,7 +29,7 @@ export class CertManagerComponent extends pulumi.ComponentResource {
             installCRDs: true,
             helmOptions: {
                 namespace: namespace.metadata.name,
-                version: "v1.13.1"
+                version: args.version
             }
         })
 
@@ -51,7 +53,7 @@ export class CertManagerComponent extends pulumi.ComponentResource {
                     {
                         "secretKey": "client-secret",
                         "remoteRef": {
-                            "key": "id:7ac3fa4e-40c4-461f-9872-76e4d25693d4",
+                            "key": "name:azuredns-client-secret",
                             "version": "latest_enabled"
                         }
                     }

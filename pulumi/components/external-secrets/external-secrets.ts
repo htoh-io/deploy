@@ -5,6 +5,7 @@ export class ExternalSecretsComponent extends pulumi.ComponentResource {
     constructor(
         name: string, 
         args: {
+            version: pulumi.Input<string>,
             accessKey: pulumi.Input<string>, 
             secretKey: pulumi.Input<string>
         }, 
@@ -27,6 +28,7 @@ export class ExternalSecretsComponent extends pulumi.ComponentResource {
             repositoryOpts:{
                 repo: "https://charts.external-secrets.io",
             },
+            version: args.version
         })
         
         const secret = new k8s.core.v1.Secret("scwsm-secret", {
