@@ -24,10 +24,6 @@ provider "scaleway" {
   region = var.region
 }
 
-data "scaleway_account_project" "default" {
-  name = "default"
-}
-
 data "scaleway_account_project" "staging" {
   name = "staging"
 }
@@ -44,4 +40,53 @@ resource "scaleway_vpc_private_network" "apps" {
   vpc_id      = scaleway_vpc.vpc_par.id
   project_id  = var.project_id
   tags        = ["terraform"]
+}
+
+resource "scaleway_k8s_cluster" "apps" {
+  name                        = "apps"
+  version                     = "1.28"
+  cni                         = "cilium"
+  delete_additional_resources = false
+  project_id                  = var.project_id
+
+  private_network_id = scaleway_vpc_private_network.apps.id
+
+  auto_upgrade {
+    enable                        = true
+    maintenance_window_start_hour = 1
+    maintenance_window_day        = "saturday"
+  }
+}
+
+resource "scaleway_k8s_pool" "apps_pool" {
+  cluster_id  = scaleway_k8s_cluster.apps.id
+  name        = "default"
+  node_type   = "PLAY2_MICRO"
+  size        = 1
+  min_size    = 1
+  max_size    = 10
+  autoscaling = false
+}
+
+resource "scaleway_rdb_instance" "main" {
+  name           = "main"
+  node_type      = "DB-DEV-S"
+  engine         = "PostgreSQL-15"
+  is_ha_cluster  = false
+  disable_backup = true
+  user_name      = "admin"
+  password       = "!HtoHSecret3"
+  project_id     = var.project_id
+
+  private_network {
+    pn_id = scaleway_vpc_private_network.apps.id
+  }
+}
+
+resource "scaleway_rdb_acl" "private_network" {
+  instance_id = scaleway_rdb_instance.main.id
+  acl_rules {
+    ip = scaleway_vpc_private_network.apps.ipv4_subnet[0].subnet
+    description = "Private network"
+  }
 }

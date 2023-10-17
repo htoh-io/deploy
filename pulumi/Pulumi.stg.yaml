@@ -1,0 +1,12 @@
+secretsprovider: azurekeyvault://htohinfra.vault.azure.net/keys/pulumi-encryption-key
+encryptedkey: Z1NBY0s0SXRpQ05VZENoTm8wdk5OWVBHQVVuVFNJekZrcEZ6RGxwMnpmbmFHbWtJcEFBdFFnZ1hVc0RFWkQ3Z1FMSWJNVXFGUHpJVVpId2lNaHZpNG9zSzZxWkxaaXNzd2ZWaXEwNTJpcXNQdUdla1ZFbXRjS3UxY1dqemo5QVBuY0d3VjJGRjBtTjU2NTdBUmRCRHZDeVlVRzlZcDRCQnc0YzZtOVpDdjdLQkRqdFpSY3ZYNkhyMzZwbGswUkpXeFVkUHM3RG1YT216QmkxNXJ4cENvRENPNjdkUlhMcFVuTFVLc3BOSnQzRWlUZi10bFVjUGh1ZFV4ZzhuTVRGT3VwcDVURmluaHlYVzQwOTJnRENvYWszTnhlWU5Fd0hZU1VIelJFTHVkOHdDaHdWVnNjM0EtYmVZcFVKU0l2YmNDVnU3TXdhXzQwejc5SkhIOHpfaHNn
+config:
+  htoh:cert-manager-version: 1.13.1
+  htoh:external-secrets-version: 0.9.6
+  htoh:ingress-version: 1.8.4
+  htoh:opentelemetry-version: 0.40.0
+  htoh:ssm-access-key:
+    secure: v1:FQcIkJaYyuLer0k9:qwwOQSzMUT9bk4g9dtiewOmEzXpwc53tF/0NT1iQmLXeEqtY
+  htoh:ssm-secret-key:
+    secure: v1:9xUaD0X35tnx+j8z:a54w/CzXGh8iPqpzll+jV1BQy0x8bU8RQcCtCHxeNjP+HVHGsb+alCbABOHBiti47v4OHQ==
+  htoh:zone-htoh-app: /subscriptions/a130654f-11e9-4af9-a215-a62b7dfcfc22/resourceGroups/rg-dns/providers/Microsoft.Network/dnsZones/htoh.app

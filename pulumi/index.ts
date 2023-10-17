@@ -24,8 +24,6 @@ const certManager = new CertManagerComponent("cert-manager", {
 
 const ingressController = new IngressControllerComponent("ingress-nginx", {
     version: config.require("ingress-version"),
-}, {
-    dependsOn: [externalSecrets]
 })
 
 const openTelemetry = new OpenTelemetryComponent("open-telemetry", {

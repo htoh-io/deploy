@@ -1,6 +1,7 @@
 import * as k8s from "@pulumi/kubernetes"
 import * as pulumi from "@pulumi/pulumi"
 import * as azure from "@pulumi/azure"
+import { AdminerAppComponent } from './adminer'
 
 export class HtohAppComponent extends pulumi.ComponentResource {
     constructor(name: string, args: {
@@ -102,7 +103,7 @@ export class HtohAppComponent extends pulumi.ComponentResource {
                                 path: "/",
                                 backend: {
                                     service: {
-                                        name: "demo-otel",
+                                        name: "adminer",
                                         port: { number: 80 },
                                     },
                                 },
@@ -112,5 +113,9 @@ export class HtohAppComponent extends pulumi.ComponentResource {
                 ],
             },
         });
+
+        const adminer = new AdminerAppComponent('adminer', {
+            namespace: namespace
+        })
     }
 }

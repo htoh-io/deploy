@@ -13,7 +13,7 @@ terraform {
   required_providers {
     scaleway = {
       source  = "scaleway/scaleway"
-      version = "2.29.0"
+      version = "2.30.0"
     }
   }
   required_version = ">= 0.13"
@@ -56,6 +56,12 @@ resource "scaleway_k8s_cluster" "apps" {
     maintenance_window_start_hour = 1
     maintenance_window_day        = "saturday"
   }
+
+  # openid_connect_config {
+  #   issuer_url = "https://login.microsoftonline.com/16843612-824f-477b-a87b-20f98cf04416/v2.0"
+  #   client_id = "dc5fe4b2-4454-4ccb-93a4-4d5edd12ab28"
+  #   username_claim = "upn"
+  # }
 }
 
 resource "scaleway_k8s_pool" "apps_pool" {
