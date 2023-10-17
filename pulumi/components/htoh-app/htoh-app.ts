@@ -10,9 +10,18 @@ export class HtohAppComponent extends pulumi.ComponentResource {
         const zone = args.zone;
         const stack = pulumi.getStack()
 
+        const namespace = new k8s.core.v1.Namespace("htoh", {
+            metadata: {
+                name: "htoh",
+                labels: {
+                    "secret.htoh.io/required": "true"
+                }
+            }
+        })
+
         const service = k8s.core.v1.Service.get("ingress-nginx-service", "ingress-nginx/ingress-nginx-controller", {})
         const controllerIp = service.status.loadBalancer.ingress[0].ip
-        
+
         new azure.dns.ARecord("wildcard-record", {
             name: `*.${stack}`,
             zoneName: zone.name,
@@ -29,43 +38,44 @@ export class HtohAppComponent extends pulumi.ComponentResource {
             records: [controllerIp],
         })
 
-        const appName = 'hello-k8s'
-        const appSvc = new k8s.core.v1.Service(`${appName}-svc`, {
-            metadata: { name: appName, },
-            spec: {
-                type: "ClusterIP",
-                ports: [{ port: 80, targetPort: 8080 }],
-                selector: { app: appName },
-            },
-        });
-        const appDep = new k8s.apps.v1.Deployment(`${appName}-dep`, {
-            metadata: { name: appName },
-            spec: {
-                replicas: 1,
-                selector: {
-                    matchLabels: { app: appName },
-                },
-                template: {
-                    metadata: {
-                        labels: { app: appName },
-                    },
-                    spec: {
-                        containers: [{
-                            name: appName,
-                            image: "adminer",
-                            ports: [{ containerPort: 8080 }],
-                            // env: [
-                            //     { name: "MESSAGE", value: "Hello K8s!" }
-                            // ],
-                        }],
-                    },
-                },
-            },
-        });
-
-        const appIngress = new k8s.networking.v1.Ingress(`${appName}-ingress`, {
+        const secret = new k8s.apiextensions.CustomResource("registry-credential", {
+            apiVersion: "external-secrets.io/v1beta1",
+            kind: "ExternalSecret",
             metadata: {
-                name: "hello-k8s-ingress",
+                namespace: namespace.metadata.name,
+                name: "registry-credential",
+            },
+            spec: {
+                "refreshInterval": "60m",
+                "secretStoreRef": {
+                    "name": "scw-secret-store",
+                    "kind": "ClusterSecretStore"
+                },
+                "target": {
+                    "template": {
+                        "type": "kubernetes.io/dockerconfigjson",
+                        "data": {
+                            ".dockerconfigjson": "{{ .registrycredential | toString }}"
+                        }
+                    },
+                    "name": "registry-credential"
+                },
+                "data": [
+                    {
+                        "secretKey": "registrycredential",
+                        "remoteRef": {
+                            "key": "name:registry-credential",
+                            "version": "latest_enabled"
+                        }
+                    }
+                ]
+            }
+        })
+
+        const appIngress = new k8s.networking.v1.Ingress(`ingress-api`, {
+            metadata: {
+                name: "ingress-api",
+                namespace: namespace.metadata.name,
                 annotations: {
                     "kubernetes.io/ingress.class": "nginx",
                     "cert-manager.io/cluster-issuer": "letsencrypt",
@@ -85,14 +95,14 @@ export class HtohAppComponent extends pulumi.ComponentResource {
                 ],
                 rules: [
                     {
-                        host:`api.${stack}.htoh.app`,
+                        host: `api.${stack}.htoh.app`,
                         http: {
                             paths: [{
                                 pathType: "Prefix",
                                 path: "/",
                                 backend: {
                                     service: {
-                                        name: appName,
+                                        name: "demo-otel",
                                         port: { number: 80 },
                                     },
                                 },
@@ -102,6 +112,5 @@ export class HtohAppComponent extends pulumi.ComponentResource {
                 ],
             },
         });
-
     }
 }
