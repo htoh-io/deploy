@@ -26,6 +26,7 @@ const ingressController = new IngressControllerComponent("ingress-nginx", {
     version: config.require("ingress-version"),
 })
 
+// Should be commented in the first run for a stack
 const openTelemetry = new OpenTelemetryComponent("open-telemetry", {
     version: config.require('opentelemetry-version')
 }, 
@@ -40,7 +41,7 @@ const zone = azure.dns.Zone.get(
 
 // This can fail if the ingressNginx component is not yet completely deployed
 // which often take some times
-// Workaround: comment the lines below 
+// Workaround: comment the lines below for the first run in a stack
 const htohApp = new HtohAppComponent("htoh-app", {
     zone: zone
 }, {

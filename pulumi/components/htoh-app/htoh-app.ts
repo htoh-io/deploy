@@ -112,5 +112,31 @@ export class HtohAppComponent extends pulumi.ComponentResource {
                 ],
             },
         });
+
+        const apiSecret = new k8s.apiextensions.CustomResource("htoh-api-secret", {
+            apiVersion: "external-secrets.io/v1beta1",
+            kind: "ExternalSecret",
+            metadata: {
+                namespace: namespace.metadata.name,
+                name: "htoh-api",
+            },
+            spec: {
+                "refreshInterval": "60m",
+                "secretStoreRef": {
+                    "name": "scw-secret-store",
+                    "kind": "ClusterSecretStore"
+                },
+                "target": {
+                    "name": "htoh-api"
+                },
+                "dataFrom": [
+                    {
+                        "extract": {
+                            "key": "path:/services/htoh-api"
+                        }
+                    }
+                ]
+            }
+        })
     }
 }
