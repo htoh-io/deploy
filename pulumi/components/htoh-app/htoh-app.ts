@@ -88,7 +88,7 @@ export class HtohAppComponent extends pulumi.ComponentResource {
                 tls: [
                     {
                         hosts: [
-                            `api.${stack}.htoh.app`
+                            `api.${stack}.htoh.app`,
                         ],
                         secretName: "tls-secret"
                     }
@@ -102,13 +102,13 @@ export class HtohAppComponent extends pulumi.ComponentResource {
                                 path: "/",
                                 backend: {
                                     service: {
-                                        name: "demo-otel",
+                                        name: "htoh-api",
                                         port: { number: 80 },
                                     },
                                 },
                             }],
                         },
-                    },
+                    }
                 ],
             },
         });
