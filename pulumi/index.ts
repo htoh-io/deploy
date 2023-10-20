@@ -18,15 +18,14 @@ const externalSecrets = new ExternalSecretsComponent("external-secrets", {
 });
 
 const certManager = new CertManagerComponent("cert-manager", {
+    useLetsEncryptStaging: config.requireBoolean("use-letsencrypt-staging"),
     azureClientId: config.require("azure-dns-client-id"),
     version: `v${config.require('cert-manager-version')}`
 }, {
     dependsOn: [externalSecrets]
 })
 
-const ingressController = new IngressControllerComponent("ingress-nginx", {
-    version: config.require("ingress-version"),
-})
+const ingressController = new IngressControllerComponent("ingress-nginx", {})
 
 // Should be commented in the first run for a stack
 const openTelemetry = new OpenTelemetryComponent("open-telemetry", {

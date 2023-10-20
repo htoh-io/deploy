@@ -8,6 +8,7 @@ export class CertManagerComponent extends pulumi.ComponentResource {
         name: string,
         args: {
             azureClientId: pulumi.Input<string>,
+            useLetsEncryptStaging: pulumi.Input<boolean>,
             version: pulumi.Input<string>
         },
         opts?: pulumi.ComponentResourceOptions
@@ -76,7 +77,9 @@ export class CertManagerComponent extends pulumi.ComponentResource {
                     "privateKeySecretRef": {
                         "name": "letsencrypt"
                     },
-                    "server": "https://acme-v02.api.letsencrypt.org/directory",
+                    "server": args.useLetsEncryptStaging ?
+                        "https://acme-staging-v02.api.letsencrypt.org/directory"
+                      : "https://acme-v02.api.letsencrypt.org/directory",
                     "solvers": [
                         {
                             "dns01": {

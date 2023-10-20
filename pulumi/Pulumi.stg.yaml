@@ -1,9 +1,9 @@
 secretsprovider: azurekeyvault://htohinfra.vault.azure.net/keys/pulumi-encryption-key
 encryptedkey: Z1NBY0s0SXRpQ05VZENoTm8wdk5OWVBHQVVuVFNJekZrcEZ6RGxwMnpmbmFHbWtJcEFBdFFnZ1hVc0RFWkQ3Z1FMSWJNVXFGUHpJVVpId2lNaHZpNG9zSzZxWkxaaXNzd2ZWaXEwNTJpcXNQdUdla1ZFbXRjS3UxY1dqemo5QVBuY0d3VjJGRjBtTjU2NTdBUmRCRHZDeVlVRzlZcDRCQnc0YzZtOVpDdjdLQkRqdFpSY3ZYNkhyMzZwbGswUkpXeFVkUHM3RG1YT216QmkxNXJ4cENvRENPNjdkUlhMcFVuTFVLc3BOSnQzRWlUZi10bFVjUGh1ZFV4ZzhuTVRGT3VwcDVURmluaHlYVzQwOTJnRENvYWszTnhlWU5Fd0hZU1VIelJFTHVkOHdDaHdWVnNjM0EtYmVZcFVKU0l2YmNDVnU3TXdhXzQwejc5SkhIOHpfaHNn
 config:
+  htoh:use-letsencrypt-staging: false
   htoh:cert-manager-version: 1.13.1
   htoh:external-secrets-version: 0.9.6
-  htoh:ingress-version: 1.8.4
   htoh:opentelemetry-version: 0.40.0
   htoh:scaleway-project-id: 9c3369b0-7bf1-4453-a56a-1e5c7ff0fa97
   htoh:ssm-access-key:

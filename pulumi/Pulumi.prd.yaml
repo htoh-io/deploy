@@ -1,9 +1,9 @@
 secretsprovider: azurekeyvault://htohinfra.vault.azure.net/keys/pulumi-encryption-key
 encryptedkey: S2VrNlZqVENSc0xVeVBiMll1YVI5cnlEQ3dhRVZrUzhNb19DbnVDUVNPUjhaOFREaVNKbW9HcEg1Q200emhDR1FObjNFRVpLOVBDblNsRUc0QmhCX0NFOTRuakxtdmtZZGEwazFOZlNacTEyaFA5RTJrRDFkSk94RXhub3NIWm9JTTA4dE1scG93dHN6ZTRCTlNveUs2ZXBpNmIwQlhDT2pURXg1WGgySDRpcGJEQldhc2JGQWVxTmUzSnc3X2NKTzBoWTY2U19QQ2hXaXc3MTBJMDJhNmZQZnhMYXFKVFFxRHBsOUpUSk9oRGNlRExyc3BrTlVrYjdaOEpqQ1hMblVnczh2dTB2RVpwWmtKNU5oeUlnWl9TX3dMMFY0VE5qczhvT3ZBelB4TDFubDlBblNOOTc5bGNDSHN1NUQydjYtVEI1ZmUtRDBTcU9Lb1pkWEVJS2d3
 config:
+  htoh:use-letsencrypt-staging: false
   htoh:cert-manager-version: 1.13.1
   htoh:external-secrets-version: 0.9.6
-  htoh:ingress-version: 1.8.4
   htoh:opentelemetry-version: 0.40.0
   htoh:azure-dns-client-id: c8d5b098-5728-4eaa-98e3-28a47bfdea9e
   htoh:azure-zone-htoh-app: /subscriptions/a130654f-11e9-4af9-a215-a62b7dfcfc22/resourceGroups/rg-dns/providers/Microsoft.Network/dnsZones/htoh.app

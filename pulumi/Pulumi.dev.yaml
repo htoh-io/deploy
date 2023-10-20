@@ -1,6 +1,7 @@
 secretsprovider: azurekeyvault://htohinfra.vault.azure.net/keys/pulumi-encryption-key
 encryptedkey: Sk93ZHlJY3Y4dmtCVmR4OHRDVHFRS0FqazBXNUVtdTdfX3o1NXgzWDdqVFRuXzQweG9WRTJzRE1pWkZldG0zZGlrQXdZLTBOQzBSUjdNd1lQTFgtcEdsV21OeGNWU09fbDNSWENjUnRSRUtfYjhNQmN0aTJ1VGlfZ0xETVA4cDhFcmd2OEVmb0dqRXh5ZnpXQWw1a0ZyY1MxLVBQVFJQQ3hDcnVQOC00cXpTWUl1dEd3NldzNUdOS2tHdHFSazE3MnlPSnA0NnNfdnR3T0ZTMC1wU0JPSThZVDNtb241TzBSY1pjMDZodXNQVmdFa3U3NWNqS0FfVG1lb3U1Y0Vza3pldllKdjJtaV9RUXNsMG1md1k5OHZ3dFZta2NDdnlvQV93bTE3OWdwVl9mV1NOdXo1dnZjZTV5ZWZPNFV5cmJwbDZWZko2SGdVdjhZeW1vLUNZSmJB
 config:
+  htoh:use-letsencrypt-staging: false
   htoh:azure-dns-client-id: c8d5b098-5728-4eaa-98e3-28a47bfdea9e
   htoh:azure-zone-htoh-app: /subscriptions/a130654f-11e9-4af9-a215-a62b7dfcfc22/resourceGroups/rg-dns/providers/Microsoft.Network/dnsZones/htoh.app
   htoh:scaleway-project-id: 9c3369b0-7bf1-4453-a56a-1e5c7ff0fa97
@@ -8,7 +9,6 @@ config:
     secure: v1:vwyQwMgsuLYmcHtq:z6WNv4eOHcZi8GdQxjmUNKaIkaTZD0uzKl9/9HPUw/3oWCWW
   htoh:ssm-secret-key:
     secure: v1:Tg5vX4rWFAq5NHzP:mLs9K3KtknDKnMYZ5zkDfyqGEJ1ms3eCtgvShKGutF2fDPNoD0Hiy+ZVlrRdWe7pwLUNRw==
-  htoh:ingress-version: 1.9.3
   htoh:cert-manager-version: 1.13.1
   htoh:external-secrets-version: 0.9.6
   htoh:opentelemetry-version: 0.40.0
