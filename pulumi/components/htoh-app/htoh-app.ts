@@ -2,6 +2,7 @@ import * as k8s from "@pulumi/kubernetes"
 import * as pulumi from "@pulumi/pulumi"
 import * as azure from "@pulumi/azure"
 import { AdminerAppComponent } from './adminer'
+import { CloudflaredAppComponent } from './cloudflared'
 
 export class HtohAppComponent extends pulumi.ComponentResource {
 
@@ -131,6 +132,10 @@ export class HtohAppComponent extends pulumi.ComponentResource {
                     }
                 ]
             }
+        })
+
+        new CloudflaredAppComponent("cloudflared", {
+            namespace: namespace
         })
     }
 }
