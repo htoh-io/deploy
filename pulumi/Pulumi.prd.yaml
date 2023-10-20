@@ -5,7 +5,8 @@ config:
   htoh:external-secrets-version: 0.9.6
   htoh:ingress-version: 1.8.4
   htoh:opentelemetry-version: 0.40.0
-  htoh:zone-htoh-app: /subscriptions/a130654f-11e9-4af9-a215-a62b7dfcfc22/resourceGroups/rg-dns/providers/Microsoft.Network/dnsZones/htoh.app
+  htoh:azure-dns-client-id: c8d5b098-5728-4eaa-98e3-28a47bfdea9e
+  htoh:azure-zone-htoh-app: /subscriptions/a130654f-11e9-4af9-a215-a62b7dfcfc22/resourceGroups/rg-dns/providers/Microsoft.Network/dnsZones/htoh.app
   htoh:ssm-access-key:
     secure: v1:lcMAbOZM4LLONb+w:m30grQ7F+e67gt20DgPf0xaZSr3G+41avHM6+t16hIiVHtUX
   htoh:ssm-secret-key:

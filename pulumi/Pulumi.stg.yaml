@@ -9,4 +9,5 @@ config:
     secure: v1:FQcIkJaYyuLer0k9:qwwOQSzMUT9bk4g9dtiewOmEzXpwc53tF/0NT1iQmLXeEqtY
   htoh:ssm-secret-key:
     secure: v1:9xUaD0X35tnx+j8z:a54w/CzXGh8iPqpzll+jV1BQy0x8bU8RQcCtCHxeNjP+HVHGsb+alCbABOHBiti47v4OHQ==
-  htoh:zone-htoh-app: /subscriptions/a130654f-11e9-4af9-a215-a62b7dfcfc22/resourceGroups/rg-dns/providers/Microsoft.Network/dnsZones/htoh.app
+  htoh:azure-dns-client-id: c8d5b098-5728-4eaa-98e3-28a47bfdea9e
+  htoh:azure-zone-htoh-app: /subscriptions/a130654f-11e9-4af9-a215-a62b7dfcfc22/resourceGroups/rg-dns/providers/Microsoft.Network/dnsZones/htoh.app

@@ -1,8 +1,8 @@
 extensions:
   basicauth/otlp:
     client_auth:
-      username: 268635
-      password: ${env:GRAFANA_CLOUD_SECRET_KEY}
+      username: ${env:GRAFANA_CLOUD_KEY}
+      password: ${env:GRAFANA_CLOUD_SECRET}
 
 receivers:
   otlp:

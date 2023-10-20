@@ -18,28 +18,26 @@ export class OpenTelemetryComponent extends pulumi.ComponentResource {
             }
         })
 
-        const secret = new k8s.apiextensions.CustomResource("grafana-cloud-secret", {
+        const secret = new k8s.apiextensions.CustomResource("opentelemetry", {
             apiVersion: "external-secrets.io/v1beta1",
             kind: "ExternalSecret",
             metadata: {
                 namespace: namespace.metadata.name,
-                name: "opentelemetry-collector",
+                name: "opentelemetry",
             },
             spec: {
                 "refreshInterval": "2m",
                 "secretStoreRef": {
-                    "name": "scw-secret-store",
+                    "name": "scw-ops-secret-store",
                     "kind": "ClusterSecretStore"
                 },
                 "target": {
-                    "name": "opentelemetry-collector"
+                    "name": "opentelemetry"
                 },
-                "data": [
+                "dataFrom": [
                     {
-                        "secretKey": "grafana-cloud-secret-key",
-                        "remoteRef": {
-                            "key": "name:grafana-cloud-secret-key",
-                            "version": "latest_enabled"
+                        "extract": {
+                            "key": "path:/kubernetes/opentelemetry"
                         }
                     }
                 ]
@@ -74,11 +72,20 @@ export class OpenTelemetryComponent extends pulumi.ComponentResource {
                 image: "otel/opentelemetry-collector-contrib",
                 env: [
                     {
-                        name: "GRAFANA_CLOUD_SECRET_KEY",
+                        name: "GRAFANA_CLOUD_KEY",
                         valueFrom: {
                             secretKeyRef: {
-                                key: "grafana-cloud-secret-key",
-                                name: "opentelemetry-collector"
+                                key: "grafana-cloud-key",
+                                name: "opentelemetry"
+                            }
+                        }
+                    },
+                    {
+                        name: "GRAFANA_CLOUD_SECRET",
+                        valueFrom: {
+                            secretKeyRef: {
+                                key: "grafana-cloud-secret",
+                                name: "opentelemetry"
                             }
                         }
                     }

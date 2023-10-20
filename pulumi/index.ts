@@ -17,6 +17,7 @@ const externalSecrets = new ExternalSecretsComponent("external-secrets", {
 });
 
 const certManager = new CertManagerComponent("cert-manager", {
+    azureClientId: config.require("azure-dns-client-id"),
     version: `v${config.require('cert-manager-version')}`
 }, {
     dependsOn: [externalSecrets]
@@ -36,12 +37,12 @@ const openTelemetry = new OpenTelemetryComponent("open-telemetry", {
 
 const zone = azure.dns.Zone.get(
     "htoh.app",
-    config.require("zone-htoh-app")
+    config.require("azure-zone-htoh-app")
 )
 
 // This can fail if the ingressNginx component is not yet completely deployed
 // which often take some times
-// Workaround: comment the lines below for the first run in a stack
+// Workaround: Should be commented in the first run for a stack
 const htohApp = new HtohAppComponent("htoh-app", {
     zone: zone
 }, {

@@ -36,46 +36,5 @@ export class AdminerAppComponent extends pulumi.ComponentResource {
                 },
             },
         });
-
-        const ingress = new k8s.networking.v1.Ingress(`ingress-adminer`, {
-            metadata: {
-                name: "ingress-adminer",
-                namespace: args.namespace.metadata.name,
-                annotations: {
-                    "kubernetes.io/ingress.class": "nginx",
-                    "cert-manager.io/cluster-issuer": "letsencrypt",
-                    "nginx.ingress.kubernetes.io/ssl-redirect": "true",
-                    "nginx.ingress.kubernetes.io/proxy-body-size": "8m"
-                },
-            },
-            spec: {
-                ingressClassName: "nginx",
-                tls: [
-                    {
-                        hosts: [
-                            `adminer.${stack}.htoh.app`,
-                        ],
-                        secretName: "tls-secret"
-                    }
-                ],
-                rules: [
-                    {
-                        host: `adminer.${stack}.htoh.app`,
-                        http: {
-                            paths: [{
-                                pathType: "Prefix",
-                                path: "/",
-                                backend: {
-                                    service: {
-                                        name: "adminer",
-                                        port: { number: 80 },
-                                    },
-                                },
-                            }],
-                        },
-                    },
-                ],
-            },
-        });
     }
 }

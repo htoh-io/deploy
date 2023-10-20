@@ -2,12 +2,12 @@ import * as k8s from "@pulumi/kubernetes"
 import * as pulumi from "@pulumi/pulumi"
 import * as certmanager from "@pulumi/kubernetes-cert-manager"
 
-
 export class CertManagerComponent extends pulumi.ComponentResource {
 
     constructor(
         name: string,
         args: {
+            azureClientId: pulumi.Input<string>,
             version: pulumi.Input<string>
         },
         opts?: pulumi.ComponentResourceOptions
@@ -33,28 +33,27 @@ export class CertManagerComponent extends pulumi.ComponentResource {
             }
         })
 
-        const secret = new k8s.apiextensions.CustomResource("azuredns-config", {
+
+        const secret = new k8s.apiextensions.CustomResource("cert-manager", {
             apiVersion: "external-secrets.io/v1beta1",
             kind: "ExternalSecret",
             metadata: {
                 namespace: "cert-manager",
-                name: "azuredns-config",
+                name: "cert-manager",
             },
             spec: {
                 "refreshInterval": "60m",
                 "secretStoreRef": {
-                    "name": "scw-secret-store",
+                    "name": "scw-ops-secret-store",
                     "kind": "ClusterSecretStore"
                 },
                 "target": {
-                    "name": "azuredns-config"
+                    "name": "cert-manager"
                 },
-                "data": [
+                "dataFrom": [
                     {
-                        "secretKey": "client-secret",
-                        "remoteRef": {
-                            "key": "name:azuredns-client-secret",
-                            "version": "latest_enabled"
+                        "extract": {
+                            "key": "path:/kubernetes/cert-manager"
                         }
                     }
                 ]
@@ -73,7 +72,7 @@ export class CertManagerComponent extends pulumi.ComponentResource {
             spec: {
                 "acme": {
                     "email": "manhha@htoh.io",
-                    "preferredChain": "",
+                    // "preferredChain": "",
                     "privateKeySecretRef": {
                         "name": "letsencrypt"
                     },
@@ -82,10 +81,10 @@ export class CertManagerComponent extends pulumi.ComponentResource {
                         {
                             "dns01": {
                                 "azureDNS": {
-                                    "clientID": "c8d5b098-5728-4eaa-98e3-28a47bfdea9e",
+                                    "clientID": args.azureClientId,
                                     "clientSecretSecretRef": {
-                                        "name": "azuredns-config",
-                                        "key": "client-secret"
+                                        "name": "cert-manager",
+                                        "key": "azure-dns-client-secret"
                                     },
                                     "subscriptionID": "a130654f-11e9-4af9-a215-a62b7dfcfc22",
                                     "tenantID": "16843612-824f-477b-a87b-20f98cf04416",

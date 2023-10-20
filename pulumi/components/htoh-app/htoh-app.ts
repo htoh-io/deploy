@@ -1,8 +1,10 @@
 import * as k8s from "@pulumi/kubernetes"
 import * as pulumi from "@pulumi/pulumi"
 import * as azure from "@pulumi/azure"
+import { AdminerAppComponent } from './adminer'
 
 export class HtohAppComponent extends pulumi.ComponentResource {
+
     constructor(name: string, args: {
         zone: azure.dns.Zone
     }, opts?: pulumi.ComponentResourceOptions) {
@@ -20,22 +22,13 @@ export class HtohAppComponent extends pulumi.ComponentResource {
         })
 
         const service = k8s.core.v1.Service.get("ingress-nginx-service", "ingress-nginx/ingress-nginx-controller", {})
-        const controllerIp = service.status.loadBalancer.ingress[0].ip
 
-        new azure.dns.ARecord("wildcard-record", {
+        new azure.dns.CNameRecord("wildcard-record", {
             name: `*.${stack}`,
             zoneName: zone.name,
             resourceGroupName: zone.resourceGroupName,
             ttl: 300,
-            records: [controllerIp],
-        })
-
-        new azure.dns.ARecord("api-record", {
-            name: `api.${stack}`,
-            zoneName: zone.name,
-            resourceGroupName: zone.resourceGroupName,
-            ttl: 300,
-            records: [controllerIp],
+            record: service.status.loadBalancer.ingress[0].hostname,
         })
 
         const secret = new k8s.apiextensions.CustomResource("registry-credential", {
@@ -72,6 +65,40 @@ export class HtohAppComponent extends pulumi.ComponentResource {
             }
         })
 
+        const containerRegistrySecret = new k8s.apiextensions.CustomResource("scw-container-registry", {
+            apiVersion: "external-secrets.io/v1beta1",
+            kind: "ExternalSecret",
+            metadata: {
+                namespace: namespace.metadata.name,
+                name: "scw-container-registry",
+            },
+            spec: {
+                "refreshInterval": "60m",
+                "secretStoreRef": {
+                    "name": "scw-ops-secret-store",
+                    "kind": "ClusterSecretStore"
+                },
+                "target": {
+                    "template": {
+                        "type": "kubernetes.io/dockerconfigjson",
+                        "data": {
+                            ".dockerconfigjson": "{{ .credentials | toString }}"
+                        }
+                    },
+                    "name": "scw-container-registry"
+                },
+                "data": [
+                    {
+                        "secretKey": "credentials",
+                        "remoteRef": {
+                            "key": "path:/kubernetes/container-registry",
+                            "version": "latest_enabled"
+                        }
+                    }
+                ]
+            }
+        })
+
         const appIngress = new k8s.networking.v1.Ingress(`ingress-api`, {
             metadata: {
                 name: "ingress-api",
@@ -88,9 +115,9 @@ export class HtohAppComponent extends pulumi.ComponentResource {
                 tls: [
                     {
                         hosts: [
-                            `api.${stack}.htoh.app`,
+                            `*.${stack}.htoh.app`,
                         ],
-                        secretName: "tls-secret"
+                        secretName: `${stack}-tls-certs`
                     }
                 ],
                 rules: [

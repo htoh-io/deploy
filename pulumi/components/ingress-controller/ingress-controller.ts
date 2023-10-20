@@ -10,7 +10,7 @@ export class IngressControllerComponent extends pulumi.ComponentResource {
         super("htoh:index:IngressControllerComponent", name, args, opts);
 
         const ingressNginx = new k8s.kustomize.Directory("scaleway-ingress-nginx", {
-            directory: `https://github.com/kubernetes/ingress-nginx/tree/controller-v${args.version}/deploy/static/provider/scw`,
-        })   
+            directory: path.resolve(__dirname),
+        })
     }
 }

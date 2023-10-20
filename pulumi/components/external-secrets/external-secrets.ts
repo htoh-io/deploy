@@ -88,5 +88,51 @@ export class ExternalSecretsComponent extends pulumi.ComponentResource {
         }, {
             dependsOn: [chart, secret]
         })
+
+        const scwOpsSecretStore = new k8s.apiextensions.CustomResource("scw-ops-secret-store", {
+            apiVersion: "external-secrets.io/v1beta1",
+            kind: "ClusterSecretStore",
+            metadata: {
+                name: "scw-ops-secret-store",
+            },
+            spec: {
+                "provider": {
+                    "scaleway": {
+                        "region": "fr-par",
+                        "projectId": "3dc537aa-866e-4b49-92d4-26936141850e",
+                        "accessKey": {
+                            "secretRef": {
+                                "namespace": "external-secrets",
+                                "name": "scwsm-secret",
+                                "key": "access-key"
+                            }
+                        },
+                        "secretKey": {
+                            "secretRef": {
+                                "namespace": "external-secrets",
+                                "name": "scwsm-secret",
+                                "key": "secret-key"
+                            }
+                        }
+                    }
+                },
+                "conditions": [
+                    {
+                        "namespaceSelector": {
+                            "matchLabels": {
+                                "secret.htoh.io/required": "true"
+                            }
+                        }
+                    },
+                    {
+                        "namespaces": [
+                            "cert-manager"
+                        ]
+                    }
+                ]
+            }
+        }, {
+            dependsOn: [chart, secret]
+        })
     }   
 }
