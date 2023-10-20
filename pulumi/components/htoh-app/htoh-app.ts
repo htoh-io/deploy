@@ -16,7 +16,8 @@ export class HtohAppComponent extends pulumi.ComponentResource {
             metadata: {
                 name: "htoh",
                 labels: {
-                    "secret.htoh.io/required": "true"
+                    "secret.htoh.io/required": "true",
+                    "env.htoh.io": stack
                 }
             }
         })
@@ -29,40 +30,6 @@ export class HtohAppComponent extends pulumi.ComponentResource {
             resourceGroupName: zone.resourceGroupName,
             ttl: 300,
             record: service.status.loadBalancer.ingress[0].hostname,
-        })
-
-        const secret = new k8s.apiextensions.CustomResource("registry-credential", {
-            apiVersion: "external-secrets.io/v1beta1",
-            kind: "ExternalSecret",
-            metadata: {
-                namespace: namespace.metadata.name,
-                name: "registry-credential",
-            },
-            spec: {
-                "refreshInterval": "60m",
-                "secretStoreRef": {
-                    "name": "scw-secret-store",
-                    "kind": "ClusterSecretStore"
-                },
-                "target": {
-                    "template": {
-                        "type": "kubernetes.io/dockerconfigjson",
-                        "data": {
-                            ".dockerconfigjson": "{{ .registrycredential | toString }}"
-                        }
-                    },
-                    "name": "registry-credential"
-                },
-                "data": [
-                    {
-                        "secretKey": "registrycredential",
-                        "remoteRef": {
-                            "key": "name:registry-credential",
-                            "version": "latest_enabled"
-                        }
-                    }
-                ]
-            }
         })
 
         const containerRegistrySecret = new k8s.apiextensions.CustomResource("scw-container-registry", {
@@ -117,7 +84,7 @@ export class HtohAppComponent extends pulumi.ComponentResource {
                         hosts: [
                             `*.${stack}.htoh.app`,
                         ],
-                        secretName: `${stack}-tls-certs`
+                        secretName: `tls-certs-${stack}`
                     }
                 ],
                 rules: [
@@ -150,7 +117,7 @@ export class HtohAppComponent extends pulumi.ComponentResource {
             spec: {
                 "refreshInterval": "60m",
                 "secretStoreRef": {
-                    "name": "scw-secret-store",
+                    "name": "scw-env-secret-store",
                     "kind": "ClusterSecretStore"
                 },
                 "target": {

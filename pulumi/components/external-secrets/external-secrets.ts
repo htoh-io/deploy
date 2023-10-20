@@ -6,6 +6,7 @@ export class ExternalSecretsComponent extends pulumi.ComponentResource {
         name: string, 
         args: {
             version: pulumi.Input<string>,
+            scalewayProjectId: pulumi.Input<string>,
             accessKey: pulumi.Input<string>, 
             secretKey: pulumi.Input<string>
         }, 
@@ -43,17 +44,17 @@ export class ExternalSecretsComponent extends pulumi.ComponentResource {
             },
         })
 
-        const clusterSecretStore = new k8s.apiextensions.CustomResource("scw-secret-store", {
+        new k8s.apiextensions.CustomResource("scw-env-secret-store", {
             apiVersion: "external-secrets.io/v1beta1",
             kind: "ClusterSecretStore",
             metadata: {
-                name: "scw-secret-store",
+                name: "scw-env-secret-store",
             },
             spec: {
                 "provider": {
                     "scaleway": {
                         "region": "fr-par",
-                        "projectId": "9c3369b0-7bf1-4453-a56a-1e5c7ff0fa97",
+                        "projectId": args.scalewayProjectId,
                         "accessKey": {
                             "secretRef": {
                                 "namespace": "external-secrets",
@@ -89,7 +90,7 @@ export class ExternalSecretsComponent extends pulumi.ComponentResource {
             dependsOn: [chart, secret]
         })
 
-        const scwOpsSecretStore = new k8s.apiextensions.CustomResource("scw-ops-secret-store", {
+        new k8s.apiextensions.CustomResource("scw-ops-secret-store", {
             apiVersion: "external-secrets.io/v1beta1",
             kind: "ClusterSecretStore",
             metadata: {

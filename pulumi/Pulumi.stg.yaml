@@ -5,6 +5,7 @@ config:
   htoh:external-secrets-version: 0.9.6
   htoh:ingress-version: 1.8.4
   htoh:opentelemetry-version: 0.40.0
+  htoh:scaleway-project-id: 9c3369b0-7bf1-4453-a56a-1e5c7ff0fa97
   htoh:ssm-access-key:
     secure: v1:FQcIkJaYyuLer0k9:qwwOQSzMUT9bk4g9dtiewOmEzXpwc53tF/0NT1iQmLXeEqtY
   htoh:ssm-secret-key:

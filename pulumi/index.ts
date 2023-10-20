@@ -11,6 +11,7 @@ import {
 const config = new pulumi.Config("htoh")
 
 const externalSecrets = new ExternalSecretsComponent("external-secrets", {
+    scalewayProjectId: config.require('scaleway-project-id'),
     version: config.require('external-secrets-version'),
     accessKey: config.requireSecret("ssm-access-key").apply(toBase64),
     secretKey: config.requireSecret("ssm-secret-key").apply(toBase64),
