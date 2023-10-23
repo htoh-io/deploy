@@ -68,6 +68,8 @@ export class HtohComponent extends pulumi.ComponentResource {
             }
         })
 
+        // const isPrd = stack === 'prd'
+
         const appIngress = new k8s.networking.v1.Ingress(`ingress-api`, {
             metadata: {
                 name: "ingress-api",
@@ -85,6 +87,7 @@ export class HtohComponent extends pulumi.ComponentResource {
                     {
                         hosts: [
                             `*.${stack}.htoh.app`,
+                            // ...(isPrd ? ["api.htoh.app"] : [])
                         ],
                         secretName: `tls-certs-${stack}`
                     }
@@ -104,7 +107,24 @@ export class HtohComponent extends pulumi.ComponentResource {
                                 },
                             }],
                         },
-                    }
+                    },
+                    // ...(isPrd ? [
+                    //     {
+                    //         host: `api.htoh.app`,
+                    //         http: {
+                    //             paths: [{
+                    //                 pathType: "Prefix",
+                    //                 path: "/",
+                    //                 backend: {
+                    //                     service: {
+                    //                         name: "htoh-api",
+                    //                         port: { number: 80 },
+                    //                     },
+                    //                 },
+                    //             }],
+                    //         },
+                    //     },
+                    // ] : [])
                 ],
             },
         });
@@ -113,4 +133,5 @@ export class HtohComponent extends pulumi.ComponentResource {
 
         new CloudflaredComponent("cloudflared", { namespace: namespace })
     }
+
 }
