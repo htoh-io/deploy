@@ -5,7 +5,7 @@ import {
     CertManagerComponent,
     IngressControllerComponent,
     OpenTelemetryComponent,
-    HtohAppComponent
+    HtohComponent
 } from './components'
 
 const config = new pulumi.Config("htoh")
@@ -43,9 +43,7 @@ const zone = azure.dns.Zone.get(
 // This can fail if the ingressNginx component is not yet completely deployed
 // which often take some times
 // Workaround: Should be commented in the first run for a stack
-const htohApp = new HtohAppComponent("htoh-app", {
-    zone: zone
-}, {
+const htoh = new HtohComponent("htoh", { zone: zone }, {
     dependsOn: [ingressController, openTelemetry]
 })
 

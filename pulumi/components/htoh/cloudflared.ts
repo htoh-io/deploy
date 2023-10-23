@@ -3,9 +3,9 @@ import * as pulumi from "@pulumi/pulumi"
 import * as fs from 'fs'
 import path = require('path')
 
-export class CloudflaredAppComponent extends pulumi.ComponentResource {
+export class CloudflaredComponent extends pulumi.ComponentResource {
     constructor(name: string, args: { namespace: k8s.core.v1.Namespace }, opts?: pulumi.ComponentResourceOptions) {
-        super("htoh:index:CloudflaredAppComponent", name, args, opts);
+        super("htoh:index:CloudflaredComponent", name, args, opts);
         const stack = pulumi.getStack()
 
         const appName = 'cloudflared'

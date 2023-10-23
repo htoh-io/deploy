@@ -1,15 +1,16 @@
 import * as k8s from "@pulumi/kubernetes"
 import * as pulumi from "@pulumi/pulumi"
 import * as azure from "@pulumi/azure"
-import { AdminerAppComponent } from './adminer'
-import { CloudflaredAppComponent } from './cloudflared'
+import { AdminerComponent } from './adminer'
+import { CloudflaredComponent } from './cloudflared'
+import { HtohApiComponent } from './htoh-api'
 
-export class HtohAppComponent extends pulumi.ComponentResource {
+export class HtohComponent extends pulumi.ComponentResource {
 
     constructor(name: string, args: {
         zone: azure.dns.Zone
     }, opts?: pulumi.ComponentResourceOptions) {
-        super("htoh:index:HtohAppComponent", name, args, opts);
+        super("htoh:index:HtohComponent", name, args, opts);
         const zone = args.zone;
         const stack = pulumi.getStack()
 
@@ -108,34 +109,8 @@ export class HtohAppComponent extends pulumi.ComponentResource {
             },
         });
 
-        const apiSecret = new k8s.apiextensions.CustomResource("htoh-api-secret", {
-            apiVersion: "external-secrets.io/v1beta1",
-            kind: "ExternalSecret",
-            metadata: {
-                namespace: namespace.metadata.name,
-                name: "htoh-api",
-            },
-            spec: {
-                "refreshInterval": "60m",
-                "secretStoreRef": {
-                    "name": "scw-env-secret-store",
-                    "kind": "ClusterSecretStore"
-                },
-                "target": {
-                    "name": "htoh-api"
-                },
-                "dataFrom": [
-                    {
-                        "extract": {
-                            "key": "path:/services/htoh-api"
-                        }
-                    }
-                ]
-            }
-        })
+        new HtohApiComponent("htoh-api", { namespace: namespace })
 
-        new CloudflaredAppComponent("cloudflared", {
-            namespace: namespace
-        })
+        new CloudflaredComponent("cloudflared", { namespace: namespace })
     }
 }

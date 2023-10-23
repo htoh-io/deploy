@@ -1,9 +1,9 @@
 import * as k8s from "@pulumi/kubernetes"
 import * as pulumi from "@pulumi/pulumi"
 
-export class AdminerAppComponent extends pulumi.ComponentResource {
+export class AdminerComponent extends pulumi.ComponentResource {
     constructor(name: string, args: { namespace: k8s.core.v1.Namespace }, opts?: pulumi.ComponentResourceOptions) {
-        super("htoh:index:AdminerAppComponent", name, args, opts);
+        super("htoh:index:AdminerComponent", name, args, opts);
         const stack = pulumi.getStack()
 
         const appName = 'adminer'
