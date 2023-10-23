@@ -83,10 +83,27 @@ resource "scaleway_rdb_instance" "main" {
   }
 }
 
+# resource "scaleway_rdb_database" "htoh" {
+#   instance_id    = scaleway_rdb_instance.main.id
+#   name           = "htoh"
+# }
+
 resource "scaleway_rdb_acl" "private_network" {
   instance_id = scaleway_rdb_instance.main.id
   acl_rules {
     ip = scaleway_vpc_private_network.apps.ipv4_subnet[0].subnet
     description = "Private network"
   }
+}
+
+output "database_address_host" {
+  value = "jdbc:postgresql://${scaleway_rdb_instance.main.private_network[0].ip}:${scaleway_rdb_instance.main.private_network[0].port}/htoh?ssl=true&sslmode=require"
+}
+
+output "k8s_cluster_id" {
+  value = scaleway_k8s_cluster.apps.id
+}
+
+output "k8s_cluster_url" {
+  value = scaleway_k8s_cluster.apps.apiserver_url
 }
