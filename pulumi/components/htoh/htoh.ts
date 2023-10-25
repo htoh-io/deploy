@@ -4,6 +4,7 @@ import * as azure from "@pulumi/azure"
 import { AdminerComponent } from './adminer'
 import { CloudflaredComponent } from './cloudflared'
 import { HtohApiComponent } from './htoh-api'
+import { StaticServerComponent } from './static-server'
 
 export class HtohComponent extends pulumi.ComponentResource {
 
@@ -33,6 +34,18 @@ export class HtohComponent extends pulumi.ComponentResource {
             ttl: 300,
             record: service.status.loadBalancer.ingress[0].hostname,
         })
+
+        const isPrd = stack === 'prd'
+
+        if (isPrd) {
+            new azure.dns.CNameRecord("api", {
+                name: `api`,
+                zoneName: zone.name,
+                resourceGroupName: zone.resourceGroupName,
+                ttl: 300,
+                record: service.status.loadBalancer.ingress[0].hostname,
+            })
+        }
 
         const containerRegistrySecret = new k8s.apiextensions.CustomResource("scw-container-registry", {
             apiVersion: "external-secrets.io/v1beta1",
@@ -68,7 +81,7 @@ export class HtohComponent extends pulumi.ComponentResource {
             }
         })
 
-        // const isPrd = stack === 'prd'
+
 
         const appIngress = new k8s.networking.v1.Ingress(`ingress-api`, {
             metadata: {
@@ -87,7 +100,7 @@ export class HtohComponent extends pulumi.ComponentResource {
                     {
                         hosts: [
                             `*.${stack}.htoh.app`,
-                            // ...(isPrd ? ["api.htoh.app"] : [])
+                            ...(isPrd ? ["api.htoh.app"] : [])
                         ],
                         secretName: `tls-certs-${stack}`
                     }
@@ -108,23 +121,38 @@ export class HtohComponent extends pulumi.ComponentResource {
                             }],
                         },
                     },
-                    // ...(isPrd ? [
-                    //     {
-                    //         host: `api.htoh.app`,
-                    //         http: {
-                    //             paths: [{
-                    //                 pathType: "Prefix",
-                    //                 path: "/",
-                    //                 backend: {
-                    //                     service: {
-                    //                         name: "htoh-api",
-                    //                         port: { number: 80 },
-                    //                     },
-                    //                 },
-                    //             }],
-                    //         },
-                    //     },
-                    // ] : [])
+                    {
+                        host: `static.${stack}.htoh.app`,
+                        http: {
+                            paths: [{
+                                pathType: "Prefix",
+                                path: "/",
+                                backend: {
+                                    service: {
+                                        name: "static-server",
+                                        port: { number: 80 },
+                                    },
+                                },
+                            }],
+                        },
+                    },
+                    ...(isPrd ? [
+                        {
+                            host: `api.htoh.app`,
+                            http: {
+                                paths: [{
+                                    pathType: "Prefix",
+                                    path: "/",
+                                    backend: {
+                                        service: {
+                                            name: "htoh-api",
+                                            port: { number: 80 },
+                                        },
+                                    },
+                                }],
+                            },
+                        },
+                    ] : [])
                 ],
             },
         });
@@ -132,6 +160,8 @@ export class HtohComponent extends pulumi.ComponentResource {
         new HtohApiComponent("htoh-api", { namespace: namespace })
 
         new CloudflaredComponent("cloudflared", { namespace: namespace })
+
+        new StaticServerComponent('static-server', {namespace: namespace})
     }
 
 }

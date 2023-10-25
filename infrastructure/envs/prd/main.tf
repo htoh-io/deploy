@@ -96,6 +96,30 @@ resource "scaleway_rdb_acl" "private_network" {
   }
 }
 
+resource "scaleway_object_bucket" "static_bucket" {
+  name = "static-htoh-${var.environment}"
+}
+
+resource "scaleway_object_bucket_acl" "static_bucket" {
+  bucket = scaleway_object_bucket.static_bucket.name
+  acl = "private"
+}
+
+resource "scaleway_iam_application" "static_server" {
+  name        = "Static server - ${var.environment}"
+  description = "Serves static files from object storage"
+}
+
+resource scaleway_iam_policy "static_server" {
+  name = "Static server - ${var.environment} "
+  description = "Access to static bucket"
+  application_id = scaleway_iam_application.static_server.id
+  rule {
+    project_ids = [data.scaleway_account_project.production.id]
+    permission_set_names = ["ObjectStorageReadOnly"]
+  }
+}
+
 output "database_address_host" {
   value = "jdbc:postgresql://${scaleway_rdb_instance.main.private_network[0].ip}:${scaleway_rdb_instance.main.private_network[0].port}/htoh?ssl=true&sslmode=require"
 }
