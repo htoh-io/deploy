@@ -78,7 +78,7 @@ export class StaticServerComponent extends pulumi.ComponentResource {
                                 },
                                 {
                                     name: 'ALLOW_DIRECTORY_LIST',
-                                    value: "true"
+                                    value: "false"
                                 },
                                 {
                                     name: 'S3_BUCKET_NAME',
