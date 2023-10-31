@@ -78,6 +78,9 @@ resource "scaleway_rdb_instance" "main" {
   volume_size_in_gb = 25
   volume_type = "bssd"
 
+  backup_schedule_frequency = 24 # Everyday
+  backup_schedule_retention = 7 # keep it one week
+
   private_network {
     pn_id = scaleway_vpc_private_network.apps.id
   }
@@ -111,7 +114,7 @@ resource "scaleway_iam_application" "static_server" {
 }
 
 resource scaleway_iam_policy "static_server" {
-  name = "Static server - ${var.environment} "
+  name = "Static server - ${var.environment}"
   description = "Access to static bucket"
   application_id = scaleway_iam_application.static_server.id
   rule {
