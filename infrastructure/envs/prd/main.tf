@@ -65,7 +65,8 @@ resource "scaleway_k8s_pool" "apps_default" {
   size        = 1
   min_size    = 1
   max_size    = 10
-  autoscaling = false
+  autohealing = true
+  autoscaling = true
 }
 
 resource "scaleway_rdb_instance" "main" {
@@ -97,6 +98,15 @@ resource "scaleway_rdb_acl" "private_network" {
     ip = scaleway_vpc_private_network.apps.ipv4_subnet[0].subnet
     description = "Private network"
   }
+}
+
+resource "scaleway_object_bucket" "htoh" {
+  name = "htoh-${var.environment}"
+}
+
+resource "scaleway_object_bucket_acl" "htoh" {
+  bucket = scaleway_object_bucket.htoh.id
+  acl = "private"
 }
 
 resource "scaleway_object_bucket" "static_bucket" {
